@@ -12,7 +12,7 @@ import ResetPasswordPage from "../pages/auth/ResetPasswordPage";
 import GoogleCallbackPage from "../pages/auth/GoogleCallbackPage";
 import ProductTestPage from "../api/catalog/ProductTestPage";
 import SellerInfoPage from "../pages/auth/SellerInfoPage";
-import SellerProductForm from "../pages/seller/ProductPage";
+import SellerProductForm from "../pages/Seller/ProductPage";
 
 // Info Pages
 import AboutPage from "../pages/info/AboutPage";
@@ -29,43 +29,43 @@ import SearchResultPage from "../pages/Catalog/SearchResultPage";
 import PromotionDetailPage from "../pages/Catalog/PromotionDetailPage";
 import UserProfilePage from "@/pages/User/UserProfilePage";
 import UserLayout from "@/pages/User/UserLayout";
-import ManageProductSellerPage from "@/pages/seller/ManageProductPage";
+import ManageProductSellerPage from "@/pages/Seller/ManageProductPage";
 
 // Admin Pages
-import AdminPage from "../pages/admin/AdminPage";
-import AdminDashboardPage from "../pages/admin/AdminDashboardPage";
-import NotificationsPage from "../pages/admin/NotificationsPage";
-import ServicePackagesPage from "../pages/admin/ServicePackagesPage";
-import CategoriesPage from "../pages/admin/CategoriesPage";
-import DiscountCodesPage from "../pages/promotion/DiscountCodesPage";
-import FlashSalePage from "../pages/promotion/FlashSalePage";
-import UsersPage from "../pages/admin/UsersPage";
-import SellerReviewPage from "../pages/admin/SellerReviewPage";
+import AdminPage from "../pages/Admin/AdminPage";
+import AdminDashboardPage from "../pages/Admin/AdminDashboardPage";
+import NotificationsPage from "../pages/Admin/NotificationsPage";
+import ServicePackagesPage from "../pages/Admin/ServicePackagesPage";
+import CategoriesPage from "../pages/Admin/CategoriesPage";
+import DiscountCodesPage from "../pages/Promotion/DiscountCodesPage";
+import FlashSalePage from "../pages/Promotion/FlashSalePage";
+import UsersPage from "../pages/Admin/UsersPage";
+import SellerReviewPage from "../pages/Admin/SellerReviewPage";
 
 // Content Admin Pages
 import ContentAdminLayout from "../components/layout/ContentAdminLayout";
-import ContentAdminDashboardPage from "../pages/admin/ContentAdminDashboardPage";
-import ReportManagementPage from "../pages/admin/ReportManagementPage";
-import ContentAdminBannerPage from "../pages/admin/ContentAdminBannerPage";
+import ContentAdminDashboardPage from "../pages/Admin/ContentAdminDashboardPage";
+import ReportManagementPage from "../pages/Admin/ReportManagementPage";
+import ContentAdminBannerPage from "../pages/Admin/ContentAdminBannerPage";
 
 // Seller Pages
-import SellerLayout from "../pages/seller/SellerLayout";
-import SellerDashboardPage from "../pages/seller/SellerDashboardPage";
-import SellerBuyersPage from "../pages/seller/SellerBuyersPage";
-import SellerVouchersPage from "../pages/seller/SellerVouchersPage";
-import SellerProfilePage from "../pages/seller/SellerProfilePage";
-import GHNShopInfoPage from "../pages/seller/GHNShopInfoPage";
-import SellerServicePackagesPage from "../pages/seller/ServicePackagesPage";
-import SellerPromotionPage from "../pages/seller/SellerPromotionPage";
-import SellerBannerManagementPage from "../pages/seller/SellerBannerManagementPage";
-import CreateBannerPage from "../pages/seller/CreateBannerPage";
+import SellerLayout from "../pages/Seller/SellerLayout";
+import SellerDashboardPage from "../pages/Seller/SellerDashboardPage";
+import SellerBuyersPage from "../pages/Seller/SellerBuyersPage";
+import SellerVouchersPage from "../pages/Seller/SellerVouchersPage";
+import SellerProfilePage from "../pages/Seller/SellerProfilePage";
+import GHNShopInfoPage from "../pages/Seller/GHNShopInfoPage";
+import SellerServicePackagesPage from "../pages/Seller/ServicePackagesPage";
+import SellerPromotionPage from "../pages/Seller/SellerPromotionPage";
+import SellerBannerManagementPage from "../pages/Seller/SellerBannerManagementPage";
+import CreateBannerPage from "../pages/Seller/CreateBannerPage";
 
 // Buyer Pages
-import CartPage from "../pages/order/CartPage";
-import CheckoutPage from "../pages/order/CheckoutPage";
-import OrderHistoryPage from "../pages/order/OrderHistoryPage";
-import VNPayPaymentReturn from "@/pages/order/PaymentReturn";
-import ChatUI from "@/pages/user/chat-app";
+import CartPage from "../pages/Order/CartPage";
+import CheckoutPage from "../pages/Order/CheckoutPage";
+import OrderHistoryPage from "../pages/Order/OrderHistoryPage";
+import VNPayPaymentReturn from "@/pages/Order/PaymentReturn";
+import ChatUI from "@/pages/User/chat-app";
 // import UserProfilePage from "../pages/user/UserProfilePage";
 import NotFoundPage from "../pages/NotFoundPage";
 
