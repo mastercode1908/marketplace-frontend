@@ -25,7 +25,7 @@ import chatApi from "../../api/communication/chatApi";
 import userApi from "../../api/identity/UserProfileApi";
 import categoryApi from "../../api/catalog/categoryApi";
 import QuantitySelector from "../../components/ui/QuantitySelector";
-import { ShippingApi } from "../../api/shipping/shippingApi";
+import { ShippingApi } from "../../api/shipping/ShippingApi";
 import AddressSelectionModal from "../../components/common/AddressSelectionModal";
 import EditReviewModal from "../../components/common/EditReviewModal";
 import "../../styles/ProductDetailPage.css";
