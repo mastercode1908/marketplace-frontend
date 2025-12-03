@@ -1,0 +1,17 @@
+.ant-dropdown-menu-item {
+  padding: 0 !important;
+}
+
+.ant-list-item {
+  transition: background-color 0.2s;
+}
+
+.ant-list-item:hover {
+  background-color: #f5f5f5 !important;
+}
+
+/* Fix z-index for notification dropdown on seller dashboard */
+/* Seller header has z-index: 1000, so dropdown needs to be higher */
+.ant-dropdown {
+  z-index: 1001 !important;
+}

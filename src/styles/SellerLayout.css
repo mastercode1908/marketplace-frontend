@@ -1,0 +1,152 @@
+/* Seller Layout Styles */
+.seller-layout {
+  min-height: 100vh;
+  background-color: #F5F5FA;
+}
+
+.seller-sidebar-header {
+  padding: 24px 16px;
+  text-align: center;
+  border-bottom: 1px solid #EDEDED;
+  background: white;
+}
+
+.seller-info h3 {
+  margin: 12px 0 4px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #222222;
+}
+
+.seller-role {
+  margin: 0;
+  font-size: 14px;
+  color: #666666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.seller-menu .ant-menu-item {
+  margin: 8px 12px;
+  border-radius: 8px;
+  height: 48px;
+  line-height: 48px;
+}
+
+.seller-menu .ant-menu-item-selected {
+  background-color: #008ECC !important;
+  color: white !important;
+}
+
+.seller-menu .ant-menu-item-selected .anticon {
+  color: white !important;
+}
+
+.seller-menu .ant-menu-item:hover {
+  background-color: #F3F9FB;
+  color: #008ECC;
+}
+
+.seller-menu .ant-menu-item:hover .anticon {
+  color: #008ECC;
+}
+
+/* Seller Content Styles */
+.seller-content {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.seller-page-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #666666;
+  margin-bottom: 8px;
+}
+
+.seller-page-description {
+  font-size: 14px;
+  color: #999999;
+  margin-bottom: 24px;
+}
+
+.seller-stat-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.seller-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.seller-stat-card .ant-statistic-title {
+  color: #666666;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.seller-stat-card .ant-statistic-content {
+  color: #008ECC;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.seller-table {
+  background: white;
+  border-radius: 8px;
+}
+
+.seller-table .ant-table-thead > tr > th {
+  background: #F5F5FA;
+  color: #666666;
+  font-weight: 600;
+  border-bottom: 2px solid #EDEDED;
+}
+
+.seller-table .ant-table-tbody > tr:hover > td {
+  background: #F3F9FB;
+}
+
+.seller-btn-primary {
+  background-color: #008ECC;
+  border-color: #008ECC;
+  color: white;
+}
+
+.seller-btn-primary:hover {
+  background-color: #0077B3;
+  border-color: #0077B3;
+}
+
+.seller-btn-danger {
+  background-color: #FF4D4F;
+  border-color: #FF4D4F;
+  color: white;
+}
+
+.seller-btn-danger:hover {
+  background-color: #FF7875;
+  border-color: #FF7875;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

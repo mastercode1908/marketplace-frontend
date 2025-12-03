@@ -1,0 +1,27 @@
+.ant-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  vertical-align: middle;
+}
+
+.ant-btn-primary .anticon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  vertical-align: middle;
+  margin: 0;
+}
+
+.ant-btn-primary .anticon + span {
+  margin-left: 0;
+}
+
+.ant-btn-primary span {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+

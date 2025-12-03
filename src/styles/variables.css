@@ -1,0 +1,14 @@
+/* Dùng khi bạn muốn override theme Ant Design / Tailwind */
+:root {
+    --color-primary: #00b14f;
+    --color-secondary: #004c25;
+    --border-radius: 0.5rem;
+}
+
+
+
+/* 🔹 Tổng kết
+Sử dụng CSS variables giúp:
+Code CSS DRY (không lặp lại giá trị)
+Dễ theme/skin app
+Thay đổi màu, border-radius, spacing chỉ 1 chỗ mà toàn app cập nhật */
