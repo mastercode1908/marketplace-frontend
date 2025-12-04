@@ -306,9 +306,11 @@ const SellerProductForm = () => {
                                             name="description"
                                             value={formData.description}
                                             onChange={handleInputChange}
-                                            placeholder="Mô tả chi tiết về tính năng, chất lượng, bảo hành..."
+                                            placeholder="Mô tả tối thiểu 10 ký tự về tính năng, chất lượng, bảo hành..."
                                             rows={4}
                                             required
+                                            maxLength={2000}
+                                            minLength={10}
                                             className="resize-none"
                                         />
                                     </div>
@@ -332,7 +334,7 @@ const SellerProductForm = () => {
                                                 onChange={handleInputChange}
                                                 placeholder="0"
                                                 min="0"
-                                                max="10000000000"
+                                                max="1000000000"
                                                 step="1000"
                                                 required
                                             />
@@ -362,7 +364,7 @@ const SellerProductForm = () => {
                                                 onChange={handleInputChange}
                                                 placeholder="0"
                                                 min="0"
-                                                max="1000000"
+                                                max="100000"
                                                 step="1"
                                                 required
                                             />
