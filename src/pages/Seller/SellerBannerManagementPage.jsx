@@ -373,17 +373,10 @@ export default function SellerBannerManagementPage() {
                             <Descriptions.Item label="Ngày Kết Thúc">
                                 {formatDate(selectedBanner.endDate)}
                             </Descriptions.Item>
-                            <Descriptions.Item label="Vị Trí">
-                                {selectedBanner.position}
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Độ Ưu Tiên">
-                                {selectedBanner.priority}
-                            </Descriptions.Item>
+
                             {selectedBanner.status === "REJECTED" && selectedBanner.rejectionReason && (
                                 <Descriptions.Item label="Lý Do Từ Chối">
-                                    <span style={{ color: "red" }}>
-                                        {selectedBanner.rejectionReason}
-                                    </span>
+                                    {selectedBanner.rejectionReason}
                                 </Descriptions.Item>
                             )}
                         </Descriptions>
