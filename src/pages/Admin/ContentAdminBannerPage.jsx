@@ -17,6 +17,7 @@ import {
   CloseCircleOutlined,
   EyeOutlined,
   ReloadOutlined,
+  SyncOutlined,
 } from "@ant-design/icons";
 import adminBannerApi from "../../api/admin/adminBannerApi";
 import { toast } from "react-hot-toast";
@@ -35,11 +36,23 @@ export default function ContentAdminBannerPage() {
   const [rejectModalVisible, setRejectModalVisible] = useState(false);
   const [selectedBanner, setSelectedBanner] = useState(null);
   const [activeTab, setActiveTab] = useState("ALL");
+  const [autoRefresh, setAutoRefresh] = useState(true);
   const [form] = Form.useForm();
 
   useEffect(() => {
     fetchBanners();
   }, [pagination.current, pagination.pageSize]);
+
+  // Auto-refresh polling every 30 seconds
+  useEffect(() => {
+    if (!autoRefresh) return;
+
+    const intervalId = setInterval(() => {
+      fetchBanners();
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(intervalId);
+  }, [autoRefresh, pagination.current, pagination.pageSize]);
 
   const fetchBanners = async () => {
     setLoading(true);
@@ -216,7 +229,7 @@ export default function ContentAdminBannerPage() {
           >
             Xem
           </Button>
-          {record.status === "PENDING" && (
+          {record.status === "PENDING" && !record.deletedAt && (
             <>
               <Button
                 type="link"
@@ -297,19 +310,38 @@ export default function ContentAdminBannerPage() {
           </h1>
           <p style={{ color: "#666", margin: "4px 0 0 0" }}>
             Duyệt và quản lý các banner quảng cáo từ seller
+            {autoRefresh && (
+              <span style={{ marginLeft: 8, color: "#52c41a", fontSize: "12px" }}>
+                • Tự động làm mới mỗi 5 giây
+              </span>
+            )}
           </p>
         </div>
-        <Button
-          icon={<ReloadOutlined />}
-          onClick={fetchBanners}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          Làm mới
-        </Button>
+        <Space>
+          <Button
+            type={autoRefresh ? "primary" : "default"}
+            icon={<SyncOutlined spin={autoRefresh} />}
+            onClick={() => setAutoRefresh(!autoRefresh)}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {autoRefresh ? "Tắt tự động" : "Bật tự động"}
+          </Button>
+          <Button
+            icon={<ReloadOutlined />}
+            onClick={fetchBanners}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            Làm mới
+          </Button>
+        </Space>
       </div>
 
       <Card>

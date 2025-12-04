@@ -52,6 +52,7 @@ export default function NotificationPage() {
   const [userOptions, setUserOptions] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [searchingUsers, setSearchingUsers] = useState(false);
+  const [alreadyReceivedUserIds, setAlreadyReceivedUserIds] = useState(new Set());
 
   const fetchData = async () => {
     setLoading(true);
@@ -200,6 +201,47 @@ export default function NotificationPage() {
 
   const handleOpenSendModal = (record) => {
     setSendingRecord(record);
+    // If already sent, show confirmation modal first
+    if (record.sentAt) {
+      setIsResendConfirmVisible(true);
+    } else {
+      // First time sending, go directly to send modal
+      sendForm.resetFields();
+      sendForm.setFieldsValue({ target: "all" });
+      setSelectedTarget("all");
+      setUserSearchText("");
+      setSelectedUsers([]);
+      setUserOptions([]);
+      setIsSendModalOpen(true);
+    }
+  };
+
+  const handleResendConfirm = async () => {
+    setIsResendConfirmVisible(false);
+
+    // Fetch recipients if notification was already sent
+    if (sendingRecord?.sentAt && sendingRecord?.id) {
+      try {
+        const res = await notificationApi.getRecipients(sendingRecord.id);
+        const recipientStrings = res.data || [];
+
+        // Parse recipient strings to extract user info
+        // Format: "username (email) - role"
+        const receivedUsernames = new Set(
+          recipientStrings.map(str => {
+            const match = str.match(/^([^(]+)/);
+            return match ? match[1].trim() : null;
+          }).filter(Boolean)
+        );
+
+        setAlreadyReceivedUserIds(receivedUsernames);
+      } catch (error) {
+        console.error("Error fetching recipients:", error);
+        setAlreadyReceivedUserIds(new Set());
+      }
+    } else {
+      setAlreadyReceivedUserIds(new Set());
+    }
     sendForm.resetFields();
     sendForm.setFieldsValue({ target: "all" });
     setSelectedTarget("all");
@@ -207,6 +249,11 @@ export default function NotificationPage() {
     setSelectedUsers([]);
     setUserOptions([]);
     setIsSendModalOpen(true);
+  };
+
+   const handleResendCancel = () => {
+    setIsResendConfirmVisible(false);
+    setSendingRecord(null);
   };
 
   const handleTargetChange = (value) => {
@@ -227,11 +274,32 @@ export default function NotificationPage() {
       setSearchingUsers(true);
       const res = await notificationApi.searchUsers(value);
       const users = res.data || [];
-      setUserOptions(users.map(u => ({
-        value: u.id.toString(),
-        label: `${u.username} (${u.email}) - ${u.role}`,
-        user: u
-      })));
+      setUserOptions(users.map(u => {
+        const alreadyReceived = alreadyReceivedUserIds.has(u.username);
+        return {
+          value: u.id.toString(),
+          label: (
+            <span>
+              {u.username} ({u.email}) - {u.role}
+              {alreadyReceived && (
+                <span style={{
+                  marginLeft: 8,
+                  padding: '2px 6px',
+                  background: '#52c41a',
+                  color: 'white',
+                  borderRadius: 4,
+                  fontSize: 11,
+                  fontWeight: 'bold'
+                }}>
+                  Đã nhận
+                </span>
+              )}
+            </span>
+          ),
+          user: u,
+          alreadyReceived
+        };
+      }));
     } catch (error) {
       console.error("Error searching users:", error);
       setUserOptions([]);
@@ -357,10 +425,11 @@ export default function NotificationPage() {
             icon={<SendOutlined />}
             size="small"
             onClick={() => handleOpenSendModal(record)}
-            disabled={!!record.sentAt}
+            // disabled={!!record.sentAt}
             style={{ width: 90, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
           >
-            {record.sentAt ? "Đã gửi" : "Gửi"}
+            {/* {record.sentAt ? "Đã gửi" : "Gửi"} */}
+            {record.sentAt ? "Gửi lại" : "Gửi"}
           </Button>
           {record.recipientCount > 0 && (
             <Button
@@ -507,21 +576,36 @@ export default function NotificationPage() {
                 <div style={{ marginTop: 8, padding: 8, background: "#f0f0f0", borderRadius: 4 }}>
                   <strong>Đã chọn {selectedUsers.length} người:</strong>
                   <div style={{ marginTop: 4 }}>
-                    {selectedUsers.map((u, idx) => (
-                      <div key={u.id} style={{ fontSize: 12, color: "#666" }}>
-                        {idx + 1}. {u.username} ({u.email})
-                      </div>
-                    ))}
+                    {selectedUsers.map((u, idx) => {
+                      const alreadyReceived = alreadyReceivedUserIds.has(u.username);
+                      return (
+                        <div key={u.id} style={{ fontSize: 12, color: "#666", display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span>{idx + 1}. {u.username} ({u.email})</span>
+                          {alreadyReceived && (
+                            <span style={{
+                              padding: '1px 5px',
+                              background: '#52c41a',
+                              color: 'white',
+                              borderRadius: 3,
+                              fontSize: 10,
+                              fontWeight: 'bold'
+                            }}>
+                              ✓ Đã nhận
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
             </Form.Item>
           )}
 
-          {selectedTarget !== "all" && selectedTarget !== "user" && sendingRecord?.recipientCount > 0 && (
-            <div style={{ padding: 12, background: "#fff7e6", border: "1px solid #ffd666", borderRadius: 4, marginTop: 8 }}>
-              <strong>Cảnh báo:</strong> Thông báo này đã gửi cho {sendingRecord.recipientCount} người cụ thể.
-              Nếu gửi cho nhóm, những người đã nhận sẽ không nhận lại (tránh spam).
+         {sendingRecord?.sentAt && (
+           <div style={{ padding: 12, background: "#e6f7ff", border: "1px solid #91d5ff", borderRadius: 4, marginTop: 8 }}>
+              <strong> Thông báo đã gửi:</strong> Thông báo này đã được gửi cho {sendingRecord.recipientCount || 0} người.
+              Hệ thống sẽ tự động chỉ gửi cho những người <strong>chưa nhận</strong> để tránh spam.
             </div>
           )}
 
@@ -589,6 +673,35 @@ export default function NotificationPage() {
             <p>Chưa có người nhận nào.</p>
           )}
       </Modal >
+      {/* Modal xác nhận gửi lại */}
+      <Modal
+        title="Xác nhận gửi lại thông báo"
+        open={isResendConfirmVisible}
+        onOk={handleResendConfirm}
+        onCancel={handleResendCancel}
+        okText="Tiếp tục"
+        cancelText="Hủy"
+        width={500}
+      >
+        {sendingRecord && (
+          <div>
+            <p><strong>Thông báo:</strong> {sendingRecord.title}</p>
+            <p><strong>Đã gửi cho:</strong> {sendingRecord.recipientCount || 0} người</p>
+            <p><strong>Thời gian gửi:</strong> {sendingRecord.sentAt}</p>
+
+            <div style={{ padding: 12, background: "#e6f7ff", border: "1px solid #91d5ff", borderRadius: 4, marginTop: 16 }}>
+              <strong>Lưu ý:</strong>
+              <ul style={{ marginTop: 8, marginBottom: 0, paddingLeft: 20 }}>
+                <li>Hệ thống sẽ <strong>tự động kiểm tra</strong> và chỉ gửi cho người chưa nhận</li>
+                <li>Người đã nhận thông báo này sẽ <strong>không nhận lại</strong></li>
+                <li>Điều này giúp <strong>tránh spam</strong> cho người dùng</li>
+              </ul>
+            </div>
+
+            <p style={{ marginTop: 16, marginBottom: 0 }}>Bạn có muốn tiếp tục gửi lại thông báo này không?</p>
+          </div>
+        )}
+      </Modal>
     </div >
   );
 }
