@@ -159,8 +159,11 @@ export default function PromotionsPage() {
   };
 
   const filteredData = promotions.filter((item) => {
-    const matchesSearch = item.promotionCode.toLowerCase().includes(searchText.toLowerCase().trim());
-    const matchesStatus = statusFilter === "all" || item.promotionStatus === statusFilter;
+    const matchesSearch = item.promotionCode
+      .toLowerCase()
+      .includes(searchText.toLowerCase().trim());
+    const matchesStatus =
+      statusFilter === "all" || item.promotionStatus === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
@@ -171,14 +174,60 @@ export default function PromotionsPage() {
       key: "promotionCode",
       render: (text) => <span className="font-semibold">{text}</span>,
     },
+    {
+      title: "Người tạo",
+      dataIndex: "ownerType",
+      key: "ownerType",
+      render: (role) => {
+        let text = "";
+        let color = "";
+
+        switch (role) {
+          case "SYSTEMADMIN":
+            text = "Admin";
+            color = "text-red-600";
+            break;
+
+          case "SELLER":
+            text = "Cửa hàng";
+            color = "text-green-600";
+            break;
+
+          default:
+            text = role;
+            color = "text-gray-600";
+        }
+
+        return <span className={`font-semibold ${color}`}>{text}</span>;
+      },
+    },
     { title: "Mô tả", dataIndex: "description", key: "description" },
     {
       title: "Loại giảm",
       dataIndex: "discountType",
       key: "discountType",
-      render: (type) => (
-        <Tag color={type === "PERCENT" ? "blue" : "purple"}>{type}</Tag>
-      ),
+      render: (type) => {
+        let color = "";
+        let text = "";
+
+        switch (type) {
+          case "PERCENT":
+            color = "blue";
+            text = "Giảm theo %";
+            break;
+
+          case "AMOUNT":
+            color = "purple";
+            text = "Giảm số tiền";
+            break;
+
+          default:
+            color = "default";
+            text = type;
+        }
+
+        return <Tag color={color}>{text}</Tag>;
+      },
     },
     {
       title: "Giá trị giảm",
@@ -212,9 +261,34 @@ export default function PromotionsPage() {
     {
       title: "Trạng thái",
       dataIndex: "promotionStatus",
-      render: (status) => (
-        <Tag color={status === "Active" ? "green" : "red"}>{status}</Tag>
-      ),
+      key: "promotionStatus",
+      render: (status) => {
+        let color = "";
+        let text = "";
+
+        switch (status) {
+          case "Active":
+            color = "green";
+            text = "Hoạt động";
+            break;
+
+          case "Inactive":
+            color = "red"; // màu xám của Ant Design
+            text = "Không hoạt động";
+            break;
+
+          case "Expired":
+            color = "default";
+            text = "Hết hạn";
+            break;
+
+          default:
+            color = "default";
+            text = status;
+        }
+
+        return <Tag color={color}>{text}</Tag>;
+      },
     },
     {
       title: "Thao tác",
@@ -249,7 +323,11 @@ export default function PromotionsPage() {
           icon={<PlusOutlined />}
           onClick={handleAdd}
           size="large"
-          style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
         >
           Thêm mã mới
         </Button>

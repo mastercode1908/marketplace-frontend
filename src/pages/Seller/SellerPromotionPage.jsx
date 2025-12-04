@@ -245,9 +245,28 @@ export default function SellerPromotionPage() {
       title: "Loại giảm",
       dataIndex: "discountType",
       key: "discountType",
-      render: (type) => (
-        <Tag color={type === "PERCENT" ? "blue" : "purple"}>{type}</Tag>
-      ),
+      render: (type) => {
+        let color = "";
+        let text = "";
+
+        switch (type) {
+          case "PERCENT":
+            color = "blue";
+            text = "Giảm theo %";
+            break;
+
+          case "AMOUNT":
+            color = "purple";
+            text = "Giảm số tiền";
+            break;
+
+          default:
+            color = "default";
+            text = type;
+        }
+
+        return <Tag color={color}>{text}</Tag>;
+      },
     },
     {
       title: "Giá trị giảm",
@@ -281,9 +300,34 @@ export default function SellerPromotionPage() {
     {
       title: "Trạng thái",
       dataIndex: "promotionStatus",
-      render: (status) => (
-        <Tag color={status === "Active" ? "green" : "red"}>{status}</Tag>
-      ),
+      key: "promotionStatus",
+      render: (status) => {
+        let color = "";
+        let text = "";
+
+        switch (status) {
+          case "Active":
+            color = "green";
+            text = "Hoạt động";
+            break;
+
+          case "Inactive":
+            color = "red"; // màu xám của Ant Design
+            text = "Không hoạt động";
+            break;
+
+          case "Expired":
+            color = "default";
+            text = "Hết hạn";
+            break;
+
+          default:
+            color = "default";
+            text = status;
+        }
+
+        return <Tag color={color}>{text}</Tag>;
+      },
     },
     // {
     //   title: "Thao tác",

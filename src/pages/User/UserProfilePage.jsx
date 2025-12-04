@@ -356,8 +356,7 @@ function AddressManagement() {
                       {formatPhoneNumber(address.receiverPhone)}
                     </div>
                     <div style={{ marginBottom: "8px", color: "#666" }}>
-                      {address.addressDetail}, {address.wardCode},{" "}
-                      {address.provinceName}
+                      {address.addressDetail}
                     </div>
                     {address.isDefault && (
                       <div style={{ marginTop: "8px" }}>
@@ -600,9 +599,13 @@ function NotificationsSection() {
       if (isNaN(timestamp)) timestamp = dayjs().valueOf();
 
       // Check both isRead (new) and is_Read (old) for backward compatibility
-      const isRead = item.isRead === true || item.isRead === "true" ||
-        item.is_Read === true || item.is_Read === "true" ||
-        item.read === true || item.read === "true";
+      const isRead =
+        item.isRead === true ||
+        item.isRead === "true" ||
+        item.is_Read === true ||
+        item.is_Read === "true" ||
+        item.read === true ||
+        item.read === "true";
 
       return {
         id: item.id || item.notificationId || item.notification_id,
@@ -643,7 +646,11 @@ function NotificationsSection() {
   const handleViewDetail = async (notification) => {
     setSelectedNotification(notification);
     setDetailVisible(true);
-    if (!notification.read && notification.id && !String(notification.id).startsWith("temp-")) {
+    if (
+      !notification.read &&
+      notification.id &&
+      !String(notification.id).startsWith("temp-")
+    ) {
       setNotifications((prev) =>
         prev.map((item) =>
           item.id === notification.id ? { ...item, read: true } : item
@@ -796,6 +803,7 @@ function NotificationsSection() {
 
 function WishlistSection() {
   const [wishlist, setWishlist] = useState([]);
+  const [totalWishlist, setTotalWishlist] = useState(0);
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
   const [removingId, setRemovingId] = useState(null);
@@ -828,6 +836,8 @@ function WishlistSection() {
       setWishlist(items);
       setPage(res.number || 0);
       setTotalPages(res.totalPages || 0);
+
+      setTotalWishlist(res.totalElements ?? items.length);
     } catch (error) {
       console.error("Error fetching wishlist:", error);
       toast.error("Không thể tải wishlist");
@@ -865,8 +875,13 @@ function WishlistSection() {
   };
 
   const filteredWishlist = wishlist.filter((item) => {
-    const matchesSearch = item.productName?.toLowerCase().includes(searchText.toLowerCase());
-    const matchesCategory = selectedCategory ? item.categoryId === selectedCategory : true;
+    const matchesSearch = item.productName
+      ?.trim()
+      .toLowerCase()
+      .includes(searchText.trim().toLowerCase());
+    const matchesCategory = selectedCategory
+      ? item.categoryId === selectedCategory
+      : true;
     return matchesSearch && matchesCategory;
   });
 
@@ -874,7 +889,7 @@ function WishlistSection() {
     <div className="wishlist-section" style={{ width: "100%" }}>
       <div className="wishlist-header">
         <div>
-          <h1 className="content-title">Wishlist ({wishlist.length})</h1>
+          <h1 className="content-title">Wishlist ({totalWishlist})</h1>
           <p className="content-description">
             Danh sách sản phẩm bạn yêu thích
           </p>
@@ -887,19 +902,6 @@ function WishlistSection() {
             onChange={(e) => setSearchText(e.target.value)}
             style={{ width: 250 }}
           />
-          <Select
-            placeholder="Tất cả danh mục"
-            style={{ width: 180 }}
-            allowClear
-            onChange={(value) => setSelectedCategory(value)}
-          >
-            <Option value={null}>Tất cả danh mục</Option>
-            {categories.map((cat) => (
-              <Option key={cat.id} value={cat.id}>
-                {cat.name}
-              </Option>
-            ))}
-          </Select>
           <Button onClick={() => fetchWishlist(page)} loading={loading}>
             Làm mới
           </Button>
@@ -966,7 +968,11 @@ function WishlistSection() {
                       type="primary"
                       icon={<ShoppingOutlined />}
                       onClick={() => navigate(`/product/${item.productId}`)}
-                      style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
                     >
                       Xem chi tiết
                     </Button>
@@ -1104,8 +1110,8 @@ export default function UserProfilePage() {
             userData.gender === true
               ? "Nam"
               : userData.gender === false
-                ? "Nữ"
-                : "Khác",
+              ? "Nữ"
+              : "Khác",
           day: day,
           month: month,
           year: year,
@@ -1141,8 +1147,8 @@ export default function UserProfilePage() {
                 fallbackData.gender === true
                   ? "Nam"
                   : fallbackData.gender === false
-                    ? "Nữ"
-                    : "Khác",
+                  ? "Nữ"
+                  : "Khác",
               day: null,
               month: null,
               year: null,
@@ -1563,7 +1569,15 @@ export default function UserProfilePage() {
             <div className="avatar-upload-section">
               <Avatar size={120} src={avatarUrl} icon={<UserOutlined />} />
               <Upload {...uploadProps}>
-                <Button className="upload-button" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                <Button
+                  className="upload-button"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                  }}
+                >
                   <CameraOutlined /> Chọn Ảnh
                 </Button>
               </Upload>

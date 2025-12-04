@@ -253,7 +253,13 @@ export default function UsersPage() {
       </Card>
 
       <Card>
-        <Table columns={columns} dataSource={users} rowKey="id" loading={loading} size="middle" />
+        <Table
+          columns={columns}
+          dataSource={users}
+          rowKey="id"
+          loading={loading}
+          size="middle"
+        />
       </Card>
 
       <Modal
@@ -336,15 +342,6 @@ export default function UsersPage() {
                       {getStatusTag(selectedUser.userStatus)}
                     </Descriptions.Item>
                   </Descriptions>
-                ),
-              },
-              {
-                key: "2",
-                label: "Lịch sử",
-                children: (
-                  <div className="text-center text-gray-500 py-8">
-                    Không có dữ liệu
-                  </div>
                 ),
               },
             ]}

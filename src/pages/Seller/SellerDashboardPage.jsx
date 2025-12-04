@@ -88,7 +88,9 @@ export default function SellerDashboardPage() {
 
   const fetchChartData = async () => {
     try {
-      const orderGrowth = await sellerDashboardApi.getOrderGrowth(selectedPeriod);
+      const orderGrowth = await sellerDashboardApi.getOrderGrowth(
+        selectedPeriod
+      );
       setOrderGrowthData(orderGrowth);
     } catch (error) {
       console.error("Error fetching chart data:", error);
@@ -199,10 +201,10 @@ export default function SellerDashboardPage() {
   // Prepare chart data
   const chartData = orderGrowthData
     ? orderGrowthData.labels.map((label, index) => ({
-      date: formatPeriodLabel(label, selectedPeriod),
-      orders: orderGrowthData.orderCounts[index],
-      revenue: orderGrowthData.revenues[index],
-    }))
+        date: formatPeriodLabel(label, selectedPeriod),
+        orders: orderGrowthData.orderCounts[index],
+        revenue: orderGrowthData.revenues[index],
+      }))
     : [];
 
   // Custom tooltip for charts
@@ -263,7 +265,13 @@ export default function SellerDashboardPage() {
             type="primary"
             icon={<SettingOutlined />}
             onClick={() => navigate("/seller/ghn-shop-info")}
-            style={{ backgroundColor: "#008ECC", borderColor: "#008ECC", display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+            style={{
+              backgroundColor: "#008ECC",
+              borderColor: "#008ECC",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
           >
             Cấu hình GHN Shop
           </Button>
@@ -444,10 +452,23 @@ export default function SellerDashboardPage() {
         <Col xs={24} lg={16}>
           <Card
             title={
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: "12px",
+                }}
+              >
                 <span>
                   Tăng Trưởng Đơn Hàng & Doanh Thu (
-                  {selectedPeriod === "daily" ? "Theo Ngày" : selectedPeriod === "weekly" ? "Theo Tuần" : "Theo Tháng"})
+                  {selectedPeriod === "daily"
+                    ? "Theo Ngày"
+                    : selectedPeriod === "weekly"
+                    ? "Theo Tuần"
+                    : "Theo Tháng"}
+                  )
                 </span>
                 <Segmented
                   value={selectedPeriod}
@@ -515,7 +536,7 @@ export default function SellerDashboardPage() {
               {[5, 4, 3, 2, 1].map((star) => {
                 const count =
                   reviewStatsData?.[
-                  `${["five", "four", "three", "two", "one"][5 - star]}Star`
+                    `${["five", "four", "three", "two", "one"][5 - star]}Star`
                   ] || 0;
                 const percent = reviewStatsData?.totalReviews
                   ? (count / reviewStatsData.totalReviews) * 100
@@ -565,23 +586,36 @@ export default function SellerDashboardPage() {
         <Row gutter={[16, 16]}>
           {/* Total Commission Card */}
           <Col xs={24} md={8}>
-            <div style={{
-              padding: "24px",
-              backgroundColor: "#f6ffed",
-              borderRadius: "8px",
-              border: "2px solid #52c41a",
-              textAlign: "center"
-            }}>
-              <div style={{ fontSize: "14px", color: "#666", marginBottom: "8px" }}>
+            <div
+              style={{
+                padding: "24px",
+                backgroundColor: "#f6ffed",
+                borderRadius: "8px",
+                border: "2px solid #52c41a",
+                textAlign: "center",
+              }}
+            >
+              <div
+                style={{ fontSize: "14px", color: "#666", marginBottom: "8px" }}
+              >
                 Tổng Hoa Hồng
               </div>
-              <div style={{ fontSize: "36px", fontWeight: "bold", color: "#52c41a", marginBottom: "8px" }}>
+              <div
+                style={{
+                  fontSize: "36px",
+                  fontWeight: "bold",
+                  color: "#ff4d4f",
+                  marginBottom: "8px",
+                }}
+              >
                 {formatPrice(kpiData?.totalCommission || 0)}
               </div>
               <div style={{ fontSize: "12px", color: "#999" }}>
                 Tỷ lệ: {kpiData?.commissionRate || 7}% của doanh thu
               </div>
-              <div style={{ fontSize: "12px", color: "#999", marginTop: "4px" }}>
+              <div
+                style={{ fontSize: "12px", color: "#999", marginTop: "4px" }}
+              >
                 Từ {commissions.length} đơn hàng đã giao
               </div>
             </div>
@@ -603,7 +637,7 @@ export default function SellerDashboardPage() {
                   key: "orderId",
                   width: 100,
                   render: (id) => `#${id}`,
-                  fixed: 'left',
+                  fixed: "left",
                 },
                 {
                   title: "Ngày Giao",
@@ -637,15 +671,17 @@ export default function SellerDashboardPage() {
                   key: "commissionAmount",
                   width: 140,
                   render: (value) => (
-                    <span style={{
-                      color: "#52c41a",
-                      fontWeight: "bold",
-                      fontSize: "15px"
-                    }}>
-                      +{formatPrice(value || 0)}
+                    <span
+                      style={{
+                        color: "#ff4d4f",
+                        fontWeight: "bold",
+                        fontSize: "15px",
+                      }}
+                    >
+                      -{formatPrice(value || 0)}
                     </span>
                   ),
-                  fixed: 'right',
+                  fixed: "right",
                 },
               ]}
             />

@@ -121,8 +121,12 @@ export default function SellerReviewPage() {
       Reviewing: { color: "orange", label: "Đang xét duyệt" },
       Active: { color: "green", label: "Đã duyệt" },
       Incomplete: { color: "red", label: "Bị từ chối" },
+      Pending: { color: "blue", label: "Đang chờ" },
     };
-    const config = statusConfig[status] || { color: "gray", label: status || "Không xác định" };
+    const config = statusConfig[status] || {
+      color: "gray",
+      label: status || "Không xác định",
+    };
     return <Tag color={config.color}>{config.label}</Tag>;
   };
 
@@ -171,7 +175,11 @@ export default function SellerReviewPage() {
             type="text"
             icon={<EyeOutlined />}
             onClick={() => showDetail(record)}
-            style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
           >
             Chi tiết
           </Button>
@@ -182,7 +190,13 @@ export default function SellerReviewPage() {
                 type="primary"
                 icon={<CheckCircleOutlined />}
                 onClick={() => handleApprove(record.sellerId)}
-                style={{ backgroundColor: "#52c41a", borderColor: "#52c41a", display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                style={{
+                  backgroundColor: "#52c41a",
+                  borderColor: "#52c41a",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
               >
                 Duyệt
               </Button>
@@ -190,7 +204,11 @@ export default function SellerReviewPage() {
                 danger
                 icon={<CloseCircleOutlined />}
                 onClick={() => showRejectModal(record)}
-                style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
               >
                 Từ chối
               </Button>
@@ -255,7 +273,8 @@ export default function SellerReviewPage() {
                 <strong>Seller:</strong> {selectedSeller.username}
               </p>
               <p>
-                <strong>Cửa hàng:</strong> {selectedSeller.shopName || "Chưa có"}
+                <strong>Cửa hàng:</strong>{" "}
+                {selectedSeller.shopName || "Chưa có"}
               </p>
             </div>
           )}
@@ -272,7 +291,9 @@ export default function SellerReviewPage() {
       >
         {selectedSeller && (
           <Descriptions column={1} bordered>
-            <Descriptions.Item label="ID">{selectedSeller.sellerId}</Descriptions.Item>
+            <Descriptions.Item label="ID">
+              {selectedSeller.sellerId}
+            </Descriptions.Item>
             <Descriptions.Item label="Tên người dùng">
               {selectedSeller.username}
             </Descriptions.Item>
@@ -316,4 +337,3 @@ export default function SellerReviewPage() {
     </div>
   );
 }
-

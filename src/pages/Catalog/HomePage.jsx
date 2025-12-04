@@ -22,11 +22,7 @@ import {
   PhoneOutlined,
   QuestionCircleOutlined,
 } from "@ant-design/icons";
-import {
-  motion,
-  useScroll,
-  useTransform,
-} from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import HomeHeader from "../../components/layout/HomeHeader";
 import HomeFooter from "../../components/layout/HomeFooter";
 import { toast } from "react-hot-toast";
@@ -200,42 +196,58 @@ export default function HomePage() {
     {
       id: 1,
       image: "https://via.placeholder.com/105x113",
-      label: "Giảm đến 50%",
+      label: "Sản phẩm nổi bật",
+      bg: "#FFE8CC",
+      color: "#CC5200",
     },
     {
       id: 2,
       image: "https://via.placeholder.com/131x126",
-      label: "Siêu sale",
+      label: "Gợi ý cho bạn",
+      bg: "#E6F4FF",
+      color: "#0066CC",
     },
     {
       id: 3,
       image: "https://via.placeholder.com/100x107",
-      label: "Mua 1 tặng 1",
+      label: "Được xem nhiều",
+      bg: "#FFF1F0",
+      color: "#CC0000",
     },
     {
       id: 4,
       image: "https://via.placeholder.com/105x123",
-      label: "Mua là có quà",
+      label: "Đáng mua hôm nay",
+      bg: "#E8FFEB",
+      color: "#2E8B57",
     },
     {
       id: 5,
       image: "https://via.placeholder.com/105x123",
-      label: "Ưu đãi đến 50%",
+      label: "Bán chạy",
+      bg: "#FFF7CC",
+      color: "#A68B00",
     },
     {
       id: 6,
       image: "https://via.placeholder.com/105x123",
-      label: "Freeship 0Đ",
+      label: "Lựa chọn hàng đầu",
+      bg: "#F5E6FF",
+      color: "#7E3DB3",
     },
     {
       id: 7,
       image: "https://via.placeholder.com/120x123",
-      label: "Mua 1 được 2",
+      label: "Hàng mới về",
+      bg: "#E8F7FF",
+      color: "#0077A3",
     },
     {
       id: 8,
       image: "https://via.placeholder.com/105x123",
-      label: "Giảm đến 50%",
+      label: "Được yêu thích",
+      bg: "#FFE6EC",
+      color: "#CC3366",
     },
   ];
 
@@ -494,8 +506,8 @@ export default function HomePage() {
               const firstMedia =
                 product.media?.length > 0
                   ? product.media.sort(
-                    (a, b) => (a.position ?? 0) - (b.position ?? 0)
-                  )[0]
+                      (a, b) => (a.position ?? 0) - (b.position ?? 0)
+                    )[0]
                   : null;
 
               const imageUrl = firstMedia?.url || FALLBACK_IMAGE;
@@ -507,8 +519,8 @@ export default function HomePage() {
               const discount =
                 originalPrice && product.price
                   ? Math.round(
-                    ((originalPrice - product.price) / originalPrice) * 100
-                  )
+                      ((originalPrice - product.price) / originalPrice) * 100
+                    )
                   : 0;
 
               let rating = 0;
@@ -823,7 +835,9 @@ export default function HomePage() {
                             >
                               <IconComponent className="text-[36px] md:text-[48px] text-[#008ECC]" />
                             </motion.div>
-                            <div className="text-xs md:text-sm font-medium text-[#333333] w-full text-center">{category.name}</div>
+                            <div className="text-xs md:text-sm font-medium text-[#333333] w-full text-center">
+                              {category.name}
+                            </div>
                           </Card>
                         </motion.div>
                       </Link>
@@ -1021,11 +1035,21 @@ export default function HomePage() {
                           className="transition-all duration-300"
                         >
                           <div className="text-center w-full">
-                            <div
-                              className="font-normal text-black text-sm md:text-base line-clamp-2"
-                              style={{ lineHeight: "1.5em", fontWeight: 400 }}
-                            >
-                              {deal.label}
+                            <div className="text-center w-full">
+                              <span
+                                style={{
+                                  backgroundColor: deal.bg,
+                                  color: deal.color,
+                                  padding: "4px 10px",
+                                  borderRadius: "8px",
+                                  fontSize: "13px",
+                                  fontWeight: 600,
+                                  display: "inline-block",
+                                  lineHeight: "1.5em",
+                                }}
+                              >
+                                {deal.label}
+                              </span>
                             </div>
                           </div>
                         </Card>
@@ -1265,7 +1289,10 @@ export default function HomePage() {
         viewport={{ once: true }}
         variants={containerVariants}
       >
-        <div className="container mx-auto px-4 md:px-[54px]" style={{ maxWidth: "1440px" }}>
+        <div
+          className="container mx-auto px-4 md:px-[54px]"
+          style={{ maxWidth: "1440px" }}
+        >
           <h2 className="text-2xl font-bold text-[#222222] mb-8 text-center">
             Hỗ Trợ & Thông Tin
           </h2>
@@ -1276,7 +1303,9 @@ export default function HomePage() {
                 whileHover={{ y: -5 }}
               >
                 <TeamOutlined className="text-3xl text-[#008ECC] mb-3" />
-                <h3 className="font-semibold text-gray-800 mb-1">Về Chúng Tôi</h3>
+                <h3 className="font-semibold text-gray-800 mb-1">
+                  Về Chúng Tôi
+                </h3>
                 <p className="text-xs text-gray-500">Tìm hiểu về MegaMart</p>
               </motion.div>
             </Link>
@@ -1287,7 +1316,9 @@ export default function HomePage() {
               >
                 <SafetyCertificateOutlined className="text-3xl text-[#008ECC] mb-3" />
                 <h3 className="font-semibold text-gray-800 mb-1">Bảo Mật</h3>
-                <p className="text-xs text-gray-500">Chính sách bảo vệ dữ liệu</p>
+                <p className="text-xs text-gray-500">
+                  Chính sách bảo vệ dữ liệu
+                </p>
               </motion.div>
             </Link>
             <Link to="/terms">
