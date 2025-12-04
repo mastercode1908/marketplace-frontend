@@ -575,7 +575,7 @@ export default function SellerDashboardPage() {
               <div style={{ fontSize: "14px", color: "#666", marginBottom: "8px" }}>
                 Tổng Hoa Hồng
               </div>
-              <div style={{ fontSize: "36px", fontWeight: "bold", color: "#52c41a", marginBottom: "8px" }}>
+              <div style={{ fontSize: "36px", fontWeight: "bold", color: "red", marginBottom: "8px" }}>
                 {formatPrice(kpiData?.totalCommission || 0)}
               </div>
               <div style={{ fontSize: "12px", color: "#999" }}>
@@ -638,11 +638,11 @@ export default function SellerDashboardPage() {
                   width: 140,
                   render: (value) => (
                     <span style={{
-                      color: "#52c41a",
+                      color: "red",
                       fontWeight: "bold",
                       fontSize: "15px"
                     }}>
-                      +{formatPrice(value || 0)}
+                      -{formatPrice(value || 0)}
                     </span>
                   ),
                   fixed: 'right',

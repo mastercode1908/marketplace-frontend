@@ -332,6 +332,8 @@ const SellerProductForm = () => {
                                                 onChange={handleInputChange}
                                                 placeholder="0"
                                                 min="0"
+                                                max="10000000000"
+                                                step="1000"
                                                 required
                                             />
                                         </div>
@@ -345,6 +347,8 @@ const SellerProductForm = () => {
                                                 onChange={handleInputChange}
                                                 placeholder="0"
                                                 min="0"
+                                                max="100000"
+                                                step="1"
                                                 required
                                             />
                                         </div>
@@ -358,6 +362,8 @@ const SellerProductForm = () => {
                                                 onChange={handleInputChange}
                                                 placeholder="0"
                                                 min="0"
+                                                max="1000000"
+                                                step="1"
                                                 required
                                             />
                                         </div>

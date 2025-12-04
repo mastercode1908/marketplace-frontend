@@ -211,7 +211,7 @@ export default function UsersPage() {
         <Row gutter={16} align="middle">
           <Col flex="auto">
             <Input
-              placeholder="Tìm kiếm username, email, số điện thoại"
+              placeholder="Tìm kiếm username"
               prefix={<SearchOutlined />}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
