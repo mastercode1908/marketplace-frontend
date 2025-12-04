@@ -11,6 +11,7 @@ export default function GoogleCallbackPage() {
     const [loading, setLoading] = useState(true);
     const [message, setMessage] = useState("");
     const [success, setSuccess] = useState(null); // true/false
+    const [userRole, setUserRole] = useState(null); // Track user role
 
     const hasShownToast = useRef(false);
 
@@ -40,6 +41,7 @@ export default function GoogleCallbackPage() {
 
                 localStorage.setItem("user", JSON.stringify(userData));
                 setUser(userData);
+                setUserRole(role); // Save role to state
 
                 const msg = "Xác thực Google thành công!";
                 setMessage(msg);
@@ -50,24 +52,27 @@ export default function GoogleCallbackPage() {
 
                 setLoading(false);
 
-                // Delay vài giây để user thấy thông báo trước khi redirect
-                setTimeout(() => {
-                    // Nếu status INCOMPLETE, chuyển đến shop-information
-                    if (status?.toUpperCase() === "INCOMPLETE") {
-                        navigate("/shop-information");
-                    } else {
-                        const userRole = role?.toUpperCase();
-                        console.log("Google callback - User role:", userRole);
-
-                        if (userRole === "ADMIN" || userRole === "SYSTEMADMIN") {
-                            navigate("/admin", { replace: true });
-                        } else if (userRole === "SELLER") {
-                            navigate("/seller/dashboard", { replace: true });
+                // Auto-redirect cho non-BUYER roles
+                const userRoleUpper = role?.toUpperCase();
+                if (userRoleUpper !== "BUYER") {
+                    setTimeout(() => {
+                        // Nếu status INCOMPLETE, chuyển đến shop-information
+                        if (status?.toUpperCase() === "INCOMPLETE") {
+                            navigate("/shop-information");
                         } else {
-                            navigate("/home", { replace: true });
+                            console.log("Google callback - User role:", userRoleUpper);
+
+                            if (userRoleUpper === "ADMIN" || userRoleUpper === "SYSTEMADMIN") {
+                                navigate("/admin", { replace: true });
+                            } else if (userRoleUpper === "SELLER") {
+                                navigate("/seller/dashboard", { replace: true });
+                            } else if (userRoleUpper === "CONTENTADMIN") {
+                                navigate("/content-admin/dashboard", { replace: true });
+                            }
                         }
-                    }
-                }, 2000);
+                    }, 2000);
+                }
+                // BUYER: không auto-redirect, hiển thị nút "Tiếp tục"
             } catch (err) {
                 console.error("Error saving auth data:", err);
                 const msg = "Xác thực thất bại";
@@ -145,7 +150,7 @@ export default function GoogleCallbackPage() {
                                 Quay lại đăng nhập
                             </button>
                         )}
-                        {success && (
+                        {success && userRole?.toUpperCase() === "BUYER" && (
                             <button
                                 onClick={() => navigate("/home")}
                                 className="w-full px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-semibold text-sm shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300"
