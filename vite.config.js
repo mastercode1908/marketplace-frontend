@@ -23,7 +23,7 @@ export default defineConfig({
     host: "0.0.0.0",            // Cho phép truy cập từ tunnel / LAN
     port: 5173,
     allowedHosts: [
-      "separate-ringtone-missed-using.trycloudflare.com", // Cloudflare Tunnel URL
+      "registry-kick-echo-lower.trycloudflare.com", // Cloudflare Tunnel URL
       // nếu muốn cho phép tất cả host, dùng: 'all'
     ],
   },

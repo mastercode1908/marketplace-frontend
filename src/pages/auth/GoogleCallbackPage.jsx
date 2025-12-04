@@ -18,67 +18,74 @@ export default function GoogleCallbackPage() {
         const params = new URLSearchParams(window.location.search);
         const successParam = params.get("success");
         const errorCode = params.get("error");
+        const accessToken = params.get("accessToken");
+        const userId = params.get("userId");
+        const email = params.get("email");
+        const role = params.get("role");
+        const status = params.get("status");
 
         setSuccess(successParam === "true");
 
-        const fetchCurrentUser = async () => {
-            if (successParam === "true") {
-                try {
-                    const res = await authApi.refreshToken(); // lấy access token từ refresh token cookie
-                    const authData = res.data;
+        if (successParam === "true" && accessToken) {
+            try {
+                // Lưu token và user info từ URL params
+                localStorage.setItem("accessToken", accessToken);
 
-                    localStorage.setItem("accessToken", authData.accessToken);
-                    localStorage.setItem("user", JSON.stringify(authData.user));
-                    setUser(authData.user);
+                const userData = {
+                    userId: userId,
+                    email: email,
+                    role: role,
+                    status: status
+                };
 
-                    const msg = authData.message || "Xác thực Google thành công!";
-                    setMessage(msg);
-                    if (!hasShownToast.current) {
-                        toast.success(msg);
-                        hasShownToast.current = true;
-                    }
+                localStorage.setItem("user", JSON.stringify(userData));
+                setUser(userData);
 
-                    // Delay vài giây để user thấy thông báo trước khi redirect
-                    setTimeout(() => {
-                        // Nếu status INCOMPLETE, chuyển đến shop-information
-                        if (authData.status?.toUpperCase() === "INCOMPLETE") {
-                            navigate("/shop-information");
-                        } else {
-                            const userRole = (authData.user?.role || authData.role || authData.user?.user?.role)?.toUpperCase();
-                            console.log("Google callback - User role:", userRole, "AuthData:", authData);
-
-                            if (userRole === "ADMIN" || userRole === "SYSTEMADMIN") {
-                                navigate("/admin", { replace: true });
-                            } else if (userRole === "SELLER") {
-                                navigate("/seller/dashboard", { replace: true });
-                            } else {
-                                navigate("/home", { replace: true });
-                            }
-                        }
-                    }, 2000);
-                } catch (err) {
-                    console.error(err);
-                    const msg = err.response?.data?.message || "Xác thực thất bại";
-                    setSuccess(false);
-                    setMessage(msg);
-                    toast.error(msg);
-
-                    setTimeout(() => navigate("/login"), 3000);
-                } finally {
-                    setLoading(false);
+                const msg = "Xác thực Google thành công!";
+                setMessage(msg);
+                if (!hasShownToast.current) {
+                    toast.success(msg);
+                    hasShownToast.current = true;
                 }
-            } else {
-                const msg = ERROR_MESSAGES_VN[errorCode] || "Xác thực thất bại!";
+
+                setLoading(false);
+
+                // Delay vài giây để user thấy thông báo trước khi redirect
+                setTimeout(() => {
+                    // Nếu status INCOMPLETE, chuyển đến shop-information
+                    if (status?.toUpperCase() === "INCOMPLETE") {
+                        navigate("/shop-information");
+                    } else {
+                        const userRole = role?.toUpperCase();
+                        console.log("Google callback - User role:", userRole);
+
+                        if (userRole === "ADMIN" || userRole === "SYSTEMADMIN") {
+                            navigate("/admin", { replace: true });
+                        } else if (userRole === "SELLER") {
+                            navigate("/seller/dashboard", { replace: true });
+                        } else {
+                            navigate("/home", { replace: true });
+                        }
+                    }
+                }, 2000);
+            } catch (err) {
+                console.error("Error saving auth data:", err);
+                const msg = "Xác thực thất bại";
+                setSuccess(false);
                 setMessage(msg);
                 toast.error(msg);
                 setLoading(false);
-
-                // Chuyển về login sau vài giây
-                setTimeout(() => navigate("/login"), 4000);
+                setTimeout(() => navigate("/login"), 3000);
             }
-        };
+        } else {
+            const msg = ERROR_MESSAGES_VN[errorCode] || "Xác thực thất bại!";
+            setMessage(msg);
+            toast.error(msg);
+            setLoading(false);
 
-        fetchCurrentUser();
+            // Chuyển về login sau vài giây
+            setTimeout(() => navigate("/login"), 4000);
+        }
     }, [navigate, setUser]);
 
     return (
