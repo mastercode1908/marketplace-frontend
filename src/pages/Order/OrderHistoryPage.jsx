@@ -28,6 +28,7 @@ import {
   UserOutlined,
   CarOutlined,
   PlusOutlined,
+  LinkOutlined,
 } from "@ant-design/icons";
 import HomeHeader from "../../components/layout/HomeHeader";
 import HomeFooter from "../../components/layout/HomeFooter";
@@ -627,7 +628,26 @@ const OrderHistoryPage = () => {
             )}
             {orderDetail.ghnOrderCode && (
               <Descriptions.Item label="Mã đơn GHN">
-                {orderDetail.ghnOrderCode}
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <span>{orderDetail.ghnOrderCode}</span>
+                  <Button
+                    type="link"
+                    icon={<LinkOutlined />}
+                    size="small"
+                    onClick={() => {
+                      const trackingUrl = `https://tracking.ghn.dev/?order_code=${orderDetail.ghnOrderCode}`;
+                      window.open(trackingUrl, "_blank", "noopener,noreferrer");
+                    }}
+                    style={{
+                      padding: 0,
+                      height: "auto",
+                      color: "#008ECC",
+                    }}
+                    title="Xem tracking trên GHN"
+                  >
+                    Theo dõi
+                  </Button>
+                </div>
               </Descriptions.Item>
             )}
           </Descriptions>
