@@ -16,6 +16,9 @@ export const API_ENDPOINTS = {
   // Refresh token
   REFRESH_TOKEN: "/auth/refresh",
 
+  // Logout
+  LOGOUT: "/auth/logout",
+
   // Prioducts
   PRODUCTS: "/product",
   PRODUCTS_SELLER: "/product/me",

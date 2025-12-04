@@ -80,7 +80,12 @@ export default function GoogleCallbackPage() {
         } else {
             const msg = ERROR_MESSAGES_VN[errorCode] || "Xác thực thất bại!";
             setMessage(msg);
-            toast.error(msg);
+
+            // Only show toast if not already shown
+            if (!hasShownToast.current) {
+                toast.error(msg);
+                hasShownToast.current = true;
+            }
             setLoading(false);
 
             // Chuyển về login sau vài giây

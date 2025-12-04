@@ -23,7 +23,7 @@ export default defineConfig({
     host: "0.0.0.0",            // Cho phép truy cập từ tunnel / LAN
     port: 5173,
     allowedHosts: [
-      "plane-fingers-jimmy-recruitment.trycloudflare.com", // Cloudflare Tunnel URL
+      "localhost:5173", // Cloudflare Tunnel URL
       // nếu muốn cho phép tất cả host, dùng: 'all'
     ],
   },

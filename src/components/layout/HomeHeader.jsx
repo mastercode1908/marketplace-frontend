@@ -22,6 +22,7 @@ import { CartApi } from "../../api/commerce/CartApi";
 import categoryApi from "../../api/catalog/categoryApi";
 import chatApi from "../../api/communication/chatApi";
 import chatWebSocketService from "../../services/chatWebSocketService";
+import authApi from "../../api/identity/authApi";
 import {
   MobileOutlined,
   LaptopOutlined,
@@ -229,11 +230,20 @@ export default function HomeHeader() {
     };
   }, [user]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("user");
-    setUser(null);
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      // Gọi backend API để xóa refresh token cookie
+      await authApi.logout();
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Vẫn tiếp tục logout ở frontend dù backend lỗi
+    } finally {
+      // Xóa local storage
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("user");
+      setUser(null);
+      navigate("/login");
+    }
   };
 
   const userMenuItems = [

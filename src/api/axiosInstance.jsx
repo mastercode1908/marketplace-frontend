@@ -30,14 +30,11 @@ axiosInstance.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
-        // Check if user had a token (was authenticated)
-        const hadToken = localStorage.getItem("accessToken");
-
-        // Nếu lỗi là 401 (Unauthorized) và chưa retry và có token
-        if (error.response?.status === 401 && !originalRequest._retry && hadToken) {
+        // Nếu lỗi là 401 (Unauthorized) và chưa retry
+        if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
             try {
-                // Gọi API refresh token
+                // Gọi API refresh token (dùng cookie)
                 const res = await axios.post(
                     `${import.meta.env.VITE_API_BASE_URL}auth/refresh`,
                     {}, // body trống, vì token nằm trong cookie
@@ -48,6 +45,12 @@ axiosInstance.interceptors.response.use(
                 const newAccessToken = res.data.data.accessToken;
                 localStorage.setItem("accessToken", newAccessToken);
 
+                // Cập nhật user info nếu có
+                const userData = res.data.data;
+                if (userData) {
+                    localStorage.setItem("user", JSON.stringify(userData));
+                }
+
                 // Gắn token mới vào header và gọi lại request cũ
                 originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
                 return axiosInstance(originalRequest);
@@ -57,10 +60,11 @@ axiosInstance.interceptors.response.use(
                 localStorage.removeItem("accessToken");
                 localStorage.removeItem("user");
                 window.location.href = "/login"; // chuyển về trang login
+                return Promise.reject(refreshError);
             }
         }
 
-        // Các lỗi khác vẫn throw bình thường (không redirect nếu là guest)
+        // Các lỗi khác vẫn throw bình thường
         return Promise.reject(error);
     }
 );
