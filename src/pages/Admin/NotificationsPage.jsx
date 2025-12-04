@@ -40,6 +40,7 @@ export default function NotificationPage() {
   const [isRecipientsModalVisible, setIsRecipientsModalVisible] = useState(false);
   const [recipients, setRecipients] = useState([]);
   const [loadingRecipients, setLoadingRecipients] = useState(false);
+  const [isResendConfirmVisible, setIsResendConfirmVisible] = useState(false);
 
   const [form] = Form.useForm();
   const [sendForm] = Form.useForm();

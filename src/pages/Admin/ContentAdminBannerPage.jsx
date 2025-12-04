@@ -69,7 +69,8 @@ export default function ContentAdminBannerPage() {
     });
   };
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status, deletedAt) => {
+    if (deletedAt) return "volcano";
     const colorMap = {
       PENDING: "orange",
       ACTIVE: "green",
@@ -80,7 +81,8 @@ export default function ContentAdminBannerPage() {
     return colorMap[status] || "default";
   };
 
-  const getStatusText = (status) => {
+  const getStatusText = (status, deletedAt) => {
+    if (deletedAt) return "Đã Xóa";
     const textMap = {
       PENDING: "Chờ Duyệt",
       ACTIVE: "Đang Hoạt Động",
@@ -184,8 +186,10 @@ export default function ContentAdminBannerPage() {
       title: "Trạng Thái",
       dataIndex: "status",
       key: "status",
-      render: (status) => (
-        <Tag color={getStatusColor(status)}>{getStatusText(status)}</Tag>
+      render: (status, record) => (
+        <Tag color={getStatusColor(status, record.deletedAt)}>
+          {getStatusText(status, record.deletedAt)}
+        </Tag>
       ),
     },
     {
@@ -366,8 +370,8 @@ export default function ContentAdminBannerPage() {
               </Descriptions.Item>
 
               <Descriptions.Item label="Trạng Thái">
-                <Tag color={getStatusColor(selectedBanner.status)}>
-                  {getStatusText(selectedBanner.status)}
+                <Tag color={getStatusColor(selectedBanner.status, selectedBanner.deletedAt)}>
+                  {getStatusText(selectedBanner.status, selectedBanner.deletedAt)}
                 </Tag>
               </Descriptions.Item>
               <Descriptions.Item label="Ngày Bắt Đầu">
