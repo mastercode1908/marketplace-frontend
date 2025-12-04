@@ -16,10 +16,12 @@ import {
     CloseCircleOutlined,
     ReloadOutlined,
     EyeOutlined,
+    MessageOutlined,
 } from "@ant-design/icons";
 import { Input } from "antd";
 import reportApi from "../../api/admin/reportApi.jsx";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import chatApi from "../../api/communication/chatApi";
 import "../../styles/AdminDashboard.css";
 
 const { Title, Text } = Typography;
@@ -28,6 +30,7 @@ const ReportManagementPage = () => {
     const [reports, setReports] = useState([]);
     const [loading, setLoading] = useState(false);
     const [actionLoading, setActionLoading] = useState(null);
+    const navigate = useNavigate();
 
     const [resolveModalVisible, setResolveModalVisible] = useState(false);
     const [rejectModalVisible, setRejectModalVisible] = useState(false);
@@ -65,6 +68,22 @@ const ReportManagementPage = () => {
     const showDetailModal = (report) => {
         setSelectedReport(report);
         setDetailModalVisible(true);
+    };
+
+    const handleChatWithSeller = async (report) => {
+        const sellerId = report.sellerId;
+        if (!sellerId) {
+            message.error("Không tìm thấy thông tin người bán");
+            return;
+        }
+
+        try {
+            await chatApi.startConversation(sellerId);
+            navigate("/user/chat");
+        } catch (error) {
+            console.error("Failed to start conversation:", error);
+            message.error("Không thể bắt đầu cuộc trò chuyện");
+        }
     };
 
     const handleConfirmResolve = async () => {
@@ -183,7 +202,7 @@ const ReportManagementPage = () => {
             title: "Hành động",
             key: "action",
             fixed: "right",
-            width: 180,
+            width: 250,
             render: (_, record) => (
                 <Space size="small">
                     {record.status === "Pending" && (
@@ -220,6 +239,18 @@ const ReportManagementPage = () => {
                     >
                         Chi tiết
                     </Button>
+                    {record.sellerId && (
+                        <Button
+                            type="default"
+                            size="small"
+                            style={{ fontSize: 12, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: "#008ECC", borderColor: "#008ECC" }}
+                            icon={<MessageOutlined />}
+                            onClick={() => handleChatWithSeller(record)}
+                            title="Nhắn tin cho seller"
+                        >
+                            Nhắn tin
+                        </Button>
+                    )}
                 </Space>
             ),
         },
