@@ -32,6 +32,10 @@ export const ShippingApi = {
   deleteAddress: (addressId) =>
     axiosInstance.delete(`/shipping/addresses/${addressId}`),
 
+  // Cập nhật địa chỉ
+  updateAddress: (addressId, data) =>
+    axiosInstance.put(`/shipping/addresses/${addressId}`, data),
+
   // Chuẩn bị checkout
   prepareCheckout: (addressId) =>
     axiosInstance.get(`/shipping/checkout/prepare?addressId=${addressId}`),

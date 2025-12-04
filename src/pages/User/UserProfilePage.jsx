@@ -128,65 +128,146 @@ function AddressManagement() {
 
   const handleEdit = async (address) => {
     setEditingAddress(address);
-    form.setFieldsValue({
-      receiverName: address.receiverName,
-      receiverPhone: address.receiverPhone,
-      addressDetail: address.addressDetail,
-      provinceName: address.provinceName,
-      districtId: address.districtId,
-      wardCode: address.wardCode,
-    });
+    setIsModalVisible(true);
 
-    // Load districts and wards
+    // Reset form first
+    form.resetFields();
+    setSelectedProvince(null);
+    setSelectedDistrict(null);
+    setDistricts([]);
+    setWards([]);
+
+    // Load districts and wards first, then set form values
     if (address.districtId) {
       try {
         const provinceRes = await userApi.getProvinces();
-        const province = provinceRes?.find(
-          (p) =>
-            address.provinceName?.includes(p.ProvinceName) ||
-            address.provinceName?.includes(p.Name)
-        );
+        let province = null;
+
+        // Try to find province by provinceName first
+        if (address.provinceName) {
+          province = provinceRes?.find((p) => {
+            const pName = p.ProvinceName || p.provinceName || p.Name || "";
+            const addrName = address.provinceName || "";
+            return (
+              pName.toLowerCase().includes(addrName.toLowerCase()) ||
+              addrName.toLowerCase().includes(pName.toLowerCase()) ||
+              pName === addrName
+            );
+          });
+        }
+
+        // If not found by name, try to find by districtId
+        if (!province && address.districtId) {
+          const districtId =
+            typeof address.districtId === "string"
+              ? parseInt(address.districtId, 10)
+              : address.districtId;
+
+          // Try each province to find the one containing this district
+          for (const p of provinceRes || []) {
+            try {
+              const provinceId = p.ProvinceID || p.Id || p.provinceId;
+              const districtRes = await userApi.getDistricts(provinceId);
+              const districtsList = districtRes || [];
+              const foundDistrict = districtsList.find(
+                (d) => (d.DistrictID || d.Id || d.districtId) === districtId
+              );
+              if (foundDistrict) {
+                province = p;
+                break;
+              }
+            } catch (e) {
+              // Continue to next province
+              continue;
+            }
+          }
+        }
+
         if (province) {
-          setSelectedProvince(province.ProvinceID || province.Id);
-          const districtRes = await userApi.getDistricts(
-            province.ProvinceID || province.Id
-          );
-          setDistricts(districtRes || []);
-          setSelectedDistrict(address.districtId);
-          const wardRes = await userApi.getWards(address.districtId);
-          setWards(wardRes || []);
+          const provinceId =
+            province.ProvinceID || province.Id || province.provinceId;
+          setSelectedProvince(provinceId);
+
+          // Load districts
+          const districtRes = await userApi.getDistricts(provinceId);
+          const districtsList = districtRes || [];
+          setDistricts(districtsList);
+
+          // Find and set selected district
+          // Convert to number for consistency
+          const districtId =
+            typeof address.districtId === "string"
+              ? parseInt(address.districtId, 10)
+              : address.districtId;
+          setSelectedDistrict(districtId);
+
+          // Load wards
+          const wardRes = await userApi.getWards(districtId);
+          const wardsList = wardRes || [];
+          setWards(wardsList);
+
+          // Now set form values after all data is loaded
+          // Ensure wardCode is string if it's stored as string
+          const wardCode = address.wardCode?.toString() || address.wardCode;
+          form.setFieldsValue({
+            receiverName: address.receiverName,
+            receiverPhone: address.receiverPhone,
+            addressDetail: address.addressDetail,
+            provinceName:
+              address.provinceName ||
+              province.ProvinceName ||
+              province.provinceName ||
+              province.Name,
+            districtId: districtId,
+            wardCode: wardCode,
+          });
+        } else {
+          // If province not found, still set basic fields
+          form.setFieldsValue({
+            receiverName: address.receiverName,
+            receiverPhone: address.receiverPhone,
+            addressDetail: address.addressDetail,
+            provinceName: address.provinceName,
+          });
         }
       } catch (error) {
         console.error("Error loading address data:", error);
+        // Still set basic fields even if loading fails
+        form.setFieldsValue({
+          receiverName: address.receiverName,
+          receiverPhone: address.receiverPhone,
+          addressDetail: address.addressDetail,
+          provinceName: address.provinceName,
+        });
       }
+    } else {
+      // If no districtId, just set basic fields
+      form.setFieldsValue({
+        receiverName: address.receiverName,
+        receiverPhone: address.receiverPhone,
+        addressDetail: address.addressDetail,
+        provinceName: address.provinceName,
+      });
     }
-
-    setIsModalVisible(true);
   };
 
-  const handleDelete = async (addressId) => {
-    Modal.confirm({
-      title: "Xác nhận xóa",
-      content: "Bạn có chắc chắn muốn xóa địa chỉ này?",
-      okText: "Xóa",
-      okType: "danger",
-      cancelText: "Hủy",
-      onOk: async () => {
-        try {
-          await userApi.deleteAddress(addressId);
-          toast.success("Xóa địa chỉ thành công!");
-          Modal.success({
-            title: "Thành công",
-            content: "Xóa địa chỉ thành công!",
-            okText: "Đóng",
-          });
-          fetchAddresses();
-        } catch (error) {
-          console.error("Error deleting address:", error);
-          toast.error("Không thể xóa địa chỉ");
-        }
-      },
-    });
+  const handleDelete = async (addressId, e) => {
+    if (e) {
+      e.stopPropagation();
+    }
+
+    try {
+      await userApi.deleteAddress(addressId);
+      toast.success("Đã xóa địa chỉ");
+      fetchAddresses();
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Không thể xóa địa chỉ";
+      toast.error(errorMessage);
+      console.error("Error deleting address:", error);
+    }
   };
 
   const handleSetDefault = async (addressId) => {
@@ -405,19 +486,32 @@ function AddressManagement() {
                     </Button>
                     {!address.isDefault && (
                       <>
-                        <Button
-                          type="link"
-                          danger
-                          onClick={() => handleDelete(address.id)}
-                          style={{ padding: 0 }}
+                        <Popconfirm
+                          title="Xóa địa chỉ?"
+                          description="Bạn có chắc chắn muốn xóa địa chỉ này?"
+                          onConfirm={(e) => {
+                            e?.stopPropagation();
+                            handleDelete(address.id, e);
+                          }}
+                          onCancel={(e) => e?.stopPropagation()}
+                          okText="Xóa"
+                          cancelText="Hủy"
+                          okButtonProps={{ danger: true }}
                         >
-                          Xóa
-                        </Button>
+                          <Button
+                            type="link"
+                            danger
+                            onClick={(e) => e.stopPropagation()}
+                            style={{ padding: 0 }}
+                          >
+                            Xóa
+                          </Button>
+                        </Popconfirm>
                         <Button
                           style={{
-                            backgroundColor: "#D9D9D9",
-                            borderColor: "#D9D9D9",
-                            color: "#666",
+                            backgroundColor: "#1798d4ff",
+                            borderColor: "#2840ceff",
+                            color: "#ffffffff",
                           }}
                           onClick={() => handleSetDefault(address.id)}
                         >
@@ -508,17 +602,25 @@ function AddressManagement() {
             <Select
               placeholder="Chọn quận/huyện"
               onChange={handleDistrictChange}
-              value={selectedDistrict}
               disabled={!selectedProvince}
+              showSearch
+              filterOption={(input, option) =>
+                (option?.children ?? "")
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
             >
-              {districts.map((district) => (
-                <Option
-                  key={district.DistrictID || district.Id}
-                  value={district.DistrictID || district.Id}
-                >
-                  {district.DistrictName || district.Name}
-                </Option>
-              ))}
+              {districts.map((district) => {
+                const districtId =
+                  district.DistrictID || district.Id || district.districtId;
+                return (
+                  <Option key={districtId} value={districtId}>
+                    {district.DistrictName ||
+                      district.Name ||
+                      district.districtName}
+                  </Option>
+                );
+              })}
             </Select>
           </Form.Item>
 
@@ -527,15 +629,24 @@ function AddressManagement() {
             name="wardCode"
             rules={[{ required: true, message: "Vui lòng chọn phường/xã" }]}
           >
-            <Select placeholder="Chọn phường/xã" disabled={!selectedDistrict}>
-              {wards.map((ward) => (
-                <Option
-                  key={ward.WardCode || ward.Code}
-                  value={ward.WardCode || ward.Code}
-                >
-                  {ward.WardName || ward.Name}
-                </Option>
-              ))}
+            <Select
+              placeholder="Chọn phường/xã"
+              disabled={!selectedDistrict}
+              showSearch
+              filterOption={(input, option) =>
+                (option?.children ?? "")
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
+            >
+              {wards.map((ward) => {
+                const wardCode = ward.WardCode || ward.Code || ward.wardCode;
+                return (
+                  <Option key={wardCode} value={wardCode}>
+                    {ward.WardName || ward.Name || ward.wardName}
+                  </Option>
+                );
+              })}
             </Select>
           </Form.Item>
 

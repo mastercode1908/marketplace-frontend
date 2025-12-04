@@ -54,6 +54,9 @@ const CheckoutPage = () => {
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
   const [showAddressModal, setShowAddressModal] = useState(false);
+  const [editingAddress, setEditingAddress] = useState(null);
+  const [showEditAddressModal, setShowEditAddressModal] = useState(false);
+  const [selectedProvinceForEdit, setSelectedProvinceForEdit] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -231,10 +234,26 @@ const CheckoutPage = () => {
 
   const handleCreateAddress = async (values) => {
     try {
-      await ShippingApi.createAddress(values);
+      // Lấy provinceName từ provinces dựa trên provinceId
+      const province = provinces.find(
+        (p) =>
+          (p.provinceId || p.ProvinceID) === values.provinceId
+      );
+      const provinceName = province
+        ? province.provinceName || province.ProvinceName
+        : "";
+
+      const addressData = {
+        ...values,
+        provinceName: provinceName,
+      };
+
+      await ShippingApi.createAddress(addressData);
       toast.success("Tạo địa chỉ thành công");
       setShowAddressModal(false);
       addressForm.resetFields();
+      setDistricts([]);
+      setWards([]);
       loadAddresses();
     } catch (error) {
       const errorMessage =
@@ -243,6 +262,128 @@ const CheckoutPage = () => {
         "Không thể tạo địa chỉ";
       toast.error(errorMessage);
       console.error("Error creating address:", error);
+    }
+  };
+
+  const handleEditAddress = async (address) => {
+    setEditingAddress(address);
+    setShowEditAddressModal(true);
+    
+    // Reset form
+    addressForm.resetFields();
+    setSelectedProvinceForEdit(null);
+    setDistricts([]);
+    setWards([]);
+
+    // Load address data
+    if (address.districtId) {
+      try {
+        // Find province from provinceName
+        const province = provinces.find(
+          (p) =>
+            address.provinceName?.includes(p.provinceName || p.ProvinceName) ||
+            (p.provinceName || p.ProvinceName)?.includes(address.provinceName)
+        );
+        
+        if (province) {
+          const provinceId = province.provinceId || province.ProvinceID;
+          setSelectedProvinceForEdit(provinceId);
+          
+          // Load districts
+          const districtRes = await ShippingApi.getDistricts(provinceId);
+          const districtsList = districtRes.data || districtRes || [];
+          setDistricts(districtsList);
+          
+          // Load wards
+          const districtId = typeof address.districtId === 'string' 
+            ? parseInt(address.districtId, 10) 
+            : address.districtId;
+          const wardRes = await ShippingApi.getWards(districtId);
+          const wardsList = wardRes.data || wardRes || [];
+          setWards(wardsList);
+          
+          // Set form values after all data is loaded
+          const wardCode = address.wardCode?.toString() || address.wardCode;
+          addressForm.setFieldsValue({
+            receiverName: address.receiverName,
+            receiverPhone: address.receiverPhone,
+            addressDetail: address.addressDetail,
+            provinceId: provinceId,
+            districtId: districtId,
+            wardCode: wardCode,
+          });
+        } else {
+          // If province not found, still set basic fields
+          addressForm.setFieldsValue({
+            receiverName: address.receiverName,
+            receiverPhone: address.receiverPhone,
+            addressDetail: address.addressDetail,
+          });
+        }
+      } catch (error) {
+        console.error("Error loading address data:", error);
+        // Still set basic fields even if loading fails
+        addressForm.setFieldsValue({
+          receiverName: address.receiverName,
+          receiverPhone: address.receiverPhone,
+          addressDetail: address.addressDetail,
+        });
+      }
+    } else {
+      // If no districtId, just set basic fields
+      addressForm.setFieldsValue({
+        receiverName: address.receiverName,
+        receiverPhone: address.receiverPhone,
+        addressDetail: address.addressDetail,
+      });
+    }
+  };
+
+  const handleUpdateAddress = async (values) => {
+    if (!editingAddress) return;
+    
+    try {
+      // Lấy provinceName từ provinces dựa trên provinceId
+      const province = provinces.find(
+        (p) =>
+          (p.provinceId || p.ProvinceID) === values.provinceId
+      );
+      const provinceName = province
+        ? province.provinceName || province.ProvinceName
+        : editingAddress.provinceName || "";
+
+      const addressData = {
+        ...values,
+        provinceName: provinceName,
+      };
+
+      // Backend có thể chưa có endpoint PUT, nên dùng delete + create
+      try {
+        await ShippingApi.updateAddress(editingAddress.id, addressData);
+      } catch (error) {
+        // Fallback: delete và create lại nếu PUT không tồn tại
+        if (error.response?.status === 404 || error.response?.status === 405) {
+          await ShippingApi.deleteAddress(editingAddress.id);
+          await ShippingApi.createAddress(addressData);
+        } else {
+          throw error;
+        }
+      }
+      toast.success("Cập nhật địa chỉ thành công");
+      setShowEditAddressModal(false);
+      setEditingAddress(null);
+      addressForm.resetFields();
+      setSelectedProvinceForEdit(null);
+      setDistricts([]);
+      setWards([]);
+      loadAddresses();
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Không thể cập nhật địa chỉ";
+      toast.error(errorMessage);
+      console.error("Error updating address:", error);
     }
   };
 
@@ -692,35 +833,53 @@ const CheckoutPage = () => {
                                 {addr.receiverPhone}
                               </p>
                             </div>
-                            <Popconfirm
-                              title="Xóa địa chỉ?"
-                              description="Bạn có chắc chắn muốn xóa địa chỉ này?"
-                              onConfirm={(e) => {
-                                e.stopPropagation();
-                                handleDeleteAddress(addr.id, e);
-                              }}
-                              onCancel={(e) => e.stopPropagation()}
-                              okText="Xóa"
-                              cancelText="Hủy"
-                              okButtonProps={{ danger: true }}
-                              onClick={(e) => e.stopPropagation()}
-                            >
+                            <div style={{ display: "flex", gap: "8px" }}>
                               <Button
-                                danger
                                 size="small"
-                                icon={<DeleteOutlined />}
                                 type="text"
-                                onClick={(e) => e.stopPropagation()}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEditAddress(addr);
+                                }}
                                 style={{
-                                  color: "#FF4D4F",
+                                  color: "#008ECC",
                                   display: "inline-flex",
                                   alignItems: "center",
                                   justifyContent: "center",
                                 }}
                               >
-                                Xóa
+                                Cập nhật
                               </Button>
-                            </Popconfirm>
+                              <Popconfirm
+                                title="Xóa địa chỉ?"
+                                description="Bạn có chắc chắn muốn xóa địa chỉ này?"
+                                onConfirm={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteAddress(addr.id, e);
+                                }}
+                                onCancel={(e) => e.stopPropagation()}
+                                okText="Xóa"
+                                cancelText="Hủy"
+                                okButtonProps={{ danger: true }}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <Button
+                                  danger
+                                  size="small"
+                                  icon={<DeleteOutlined />}
+                                  type="text"
+                                  onClick={(e) => e.stopPropagation()}
+                                  style={{
+                                    color: "#FF4D4F",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                  }}
+                                >
+                                  Xóa
+                                </Button>
+                              </Popconfirm>
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -1496,12 +1655,14 @@ const CheckoutPage = () => {
               <Select
                 placeholder="Chọn tỉnh/thành phố"
                 onChange={(provinceId) => {
+                  setSelectedProvinceForEdit(provinceId);
                   loadDistricts(provinceId);
                   addressForm.setFieldsValue({
                     districtId: null,
                     wardCode: null,
                   });
                 }}
+                value={selectedProvinceForEdit}
                 style={{ borderRadius: "8px" }}
               >
                 {provinces
@@ -1628,6 +1789,170 @@ const CheckoutPage = () => {
                   </div>
                 </div>
               }
+            >
+              <Input.TextArea
+                rows={4}
+                placeholder="Ví dụ: 123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh"
+                showCount
+                maxLength={500}
+                style={{ borderRadius: "8px" }}
+              />
+            </Form.Item>
+          </Form>
+        </Modal>
+
+        {/* Modal cập nhật địa chỉ */}
+        <Modal
+          title="Cập nhật địa chỉ"
+          open={showEditAddressModal}
+          onCancel={() => {
+            setShowEditAddressModal(false);
+            setEditingAddress(null);
+            addressForm.resetFields();
+            setSelectedProvinceForEdit(null);
+            setDistricts([]);
+            setWards([]);
+          }}
+          onOk={() => addressForm.submit()}
+          width={700}
+          okText="Cập nhật"
+          cancelText="Hủy"
+          okButtonProps={{
+            style: { backgroundColor: "#008ECC", borderColor: "#008ECC" },
+          }}
+        >
+          <Alert
+            message="Lưu ý quan trọng"
+            description="Địa chỉ phải đầy đủ và chính xác để GHN có thể giao hàng. Vui lòng nhập đầy đủ số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố."
+            type="info"
+            showIcon
+            style={{ marginBottom: "20px" }}
+          />
+          <Form
+            form={addressForm}
+            onFinish={handleUpdateAddress}
+            layout="vertical"
+          >
+            <Form.Item
+              name="receiverName"
+              label="Tên người nhận"
+              rules={[{ required: true, message: "Vui lòng nhập tên" }]}
+            >
+              <Input style={{ borderRadius: "8px" }} />
+            </Form.Item>
+            <Form.Item
+              name="receiverPhone"
+              label="Số điện thoại"
+              rules={[
+                { required: true, message: "Vui lòng nhập số điện thoại" },
+              ]}
+            >
+              <Input style={{ borderRadius: "8px" }} />
+            </Form.Item>
+            <Form.Item
+              name="provinceId"
+              label="Tỉnh/Thành phố"
+              rules={[{ required: true, message: "Vui lòng chọn tỉnh" }]}
+            >
+              <Select
+                placeholder="Chọn tỉnh/thành phố"
+                onChange={(provinceId) => {
+                  setSelectedProvinceForEdit(provinceId);
+                  loadDistricts(provinceId);
+                  addressForm.setFieldsValue({
+                    districtId: null,
+                    wardCode: null,
+                  });
+                }}
+                value={selectedProvinceForEdit}
+                style={{ borderRadius: "8px" }}
+              >
+                {provinces
+                  .filter(
+                    (p) => p && (p.provinceId != null || p.ProvinceID != null)
+                  )
+                  .map((p) => {
+                    const id = p.provinceId || p.ProvinceID;
+                    const name = p.provinceName || p.ProvinceName;
+                    return (
+                      <Option key={id} value={id}>
+                        {name}
+                      </Option>
+                    );
+                  })}
+              </Select>
+            </Form.Item>
+            <Form.Item
+              name="districtId"
+              label="Quận/Huyện"
+              rules={[{ required: true, message: "Vui lòng chọn quận/huyện" }]}
+            >
+              <Select
+                placeholder="Chọn quận/huyện"
+                onChange={(districtId) => {
+                  loadWards(districtId);
+                  addressForm.setFieldsValue({ wardCode: null });
+                }}
+                style={{ borderRadius: "8px" }}
+                showSearch
+                filterOption={(input, option) =>
+                  (option?.children ?? '').toLowerCase().includes(input.toLowerCase())
+                }
+              >
+                {districts
+                  .filter(
+                    (d) => d && (d.districtId != null || d.DistrictID != null)
+                  )
+                  .map((d) => {
+                    const id = d.districtId || d.DistrictID;
+                    const name = d.districtName || d.DistrictName;
+                    return (
+                      <Option key={id} value={id}>
+                        {name}
+                      </Option>
+                    );
+                  })}
+              </Select>
+            </Form.Item>
+            <Form.Item
+              name="wardCode"
+              label="Phường/Xã"
+              rules={[{ required: true, message: "Vui lòng chọn phường/xã" }]}
+            >
+              <Select
+                placeholder="Chọn phường/xã"
+                style={{ borderRadius: "8px" }}
+                showSearch
+                filterOption={(input, option) =>
+                  (option?.children ?? '').toLowerCase().includes(input.toLowerCase())
+                }
+              >
+                {wards
+                  .filter(
+                    (w) => w && (w.wardCode != null || w.WardCode != null)
+                  )
+                  .map((w) => {
+                    const code = w.wardCode || w.WardCode;
+                    const name = w.wardName || w.WardName;
+                    return (
+                      <Option key={code} value={code}>
+                        {name}
+                      </Option>
+                    );
+                  })}
+              </Select>
+            </Form.Item>
+            <Form.Item
+              name="addressDetail"
+              label="Địa chỉ cụ thể"
+              rules={[
+                { required: true, message: "Vui lòng nhập địa chỉ cụ thể" },
+                {
+                  min: 15,
+                  message:
+                    "Địa chỉ phải có ít nhất 15 ký tự để đảm bảo đầy đủ thông tin",
+                },
+              ]}
             >
               <Input.TextArea
                 rows={4}
