@@ -665,9 +665,9 @@ export default function ProductDetailPage() {
                     {reviewStats.total} đánh giá
                   </span>
                   <span className="rating-divider" />
-                  <span className="sold-count">
+                  {/* <span className="sold-count">
                     {product?.soldCount || product?.soldQuantity || 0} đã bán
-                  </span>
+                  </span> */}
                 </div>
 
                 <div className="product-price-line">

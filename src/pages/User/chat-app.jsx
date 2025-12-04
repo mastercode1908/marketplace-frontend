@@ -39,9 +39,25 @@ export default function ChatApp() {
 
                 setConversations(data)
 
-                // Auto chọn cuộc trò chuyện đầu tiên
-                if (data.length > 0) {
-                    setSelectedConversation(data[0].conversationId)
+                // Try to restore previously selected conversation from localStorage
+                const savedConversationId = localStorage.getItem('selectedConversationId')
+                let conversationToSelect = null
+
+                if (savedConversationId) {
+                    // Check if saved conversation still exists
+                    const exists = data.find(c => c.conversationId === parseInt(savedConversationId))
+                    if (exists) {
+                        conversationToSelect = parseInt(savedConversationId)
+                    }
+                }
+
+                // Fall back to first conversation if no saved or saved doesn't exist
+                if (!conversationToSelect && data.length > 0) {
+                    conversationToSelect = data[0].conversationId
+                }
+
+                if (conversationToSelect) {
+                    setSelectedConversation(conversationToSelect)
                 }
             } catch (error) {
                 console.error("Failed to fetch conversations:", error)
@@ -99,6 +115,8 @@ export default function ChatApp() {
 
     const handleConversationSelect = async (conversationId) => {
         setSelectedConversation(conversationId)
+        // Save to localStorage for persistence
+        localStorage.setItem('selectedConversationId', conversationId.toString())
 
         // Mark as read API
         try {
