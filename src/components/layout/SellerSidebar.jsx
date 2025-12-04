@@ -18,6 +18,8 @@ import "../../styles/SellerLayout.css";
 import chatApi from "../../api/communication/chatApi";
 import chatWebSocketService from "../../services/chatWebSocketService";
 import servicePackageApi from "../../api/seller/servicePackageApi";
+import axiosInstance from "../../api/axiosInstance";
+import { message } from "antd";
 
 const { Sider } = Layout;
 
@@ -137,14 +139,56 @@ export default function SellerSidebar() {
         </span>
       ),
     },
+    {
+      key: "chat-content-admin",
+      icon: <MessageOutlined />,
+      label: "Chat với Content Admin",
+    },
+    {
+      key: "chat-system-admin",
+      icon: <MessageOutlined />,
+      label: "Chat với System Admin",
+    },
   ];
 
   const handleMenuClick = ({ key }) => {
+    if (key === "chat-content-admin") {
+      handleChatWithAdmin("CONTENTADMIN");
+      return;
+    }
+    if (key === "chat-system-admin") {
+      handleChatWithAdmin("SYSTEMADMIN");
+      return;
+    }
     navigate(key);
+  };
+
+  const handleChatWithAdmin = async (role) => {
+    try {
+      // Lấy admin ID theo role
+      const response = await axiosInstance.get(`/admin/users/admin/by-role?role=${role}`);
+      const adminId = response.data.adminId;
+      
+      if (!adminId) {
+        message.error(`Không tìm thấy ${role === 'CONTENTADMIN' ? 'Content Admin' : 'System Admin'}`);
+        return;
+      }
+
+      // Bắt đầu conversation với admin
+      await chatApi.startConversation(adminId);
+      navigate("/user/chat");
+    } catch (error) {
+      console.error(`Failed to start conversation with ${role}:`, error);
+      message.error(`Không thể bắt đầu cuộc trò chuyện với ${role === 'CONTENTADMIN' ? 'Content Admin' : 'System Admin'}`);
+    }
   };
 
   // Xác định selected key, bao gồm cả /orders/seller
   const selectedKey = menuItems.find((item) => {
+    // Bỏ qua các nút chat admin trong việc xác định selected key
+    if (item.key === "chat-content-admin" || item.key === "chat-system-admin") {
+      return false;
+    }
     if (item.key === "/seller/orders") {
       return location.pathname.startsWith("/orders/seller") || location.pathname.startsWith("/seller/orders");
     }
