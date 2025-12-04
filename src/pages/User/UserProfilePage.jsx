@@ -865,7 +865,7 @@ function WishlistSection() {
   };
 
   const filteredWishlist = wishlist.filter((item) => {
-    const matchesSearch = item.productName?.toLowerCase().includes(searchText.toLowerCase());
+    const matchesSearch = item.productName?.toLowerCase().includes(searchText.toLowerCase().trim());
     const matchesCategory = selectedCategory ? item.categoryId === selectedCategory : true;
     return matchesSearch && matchesCategory;
   });
@@ -874,7 +874,7 @@ function WishlistSection() {
     <div className="wishlist-section" style={{ width: "100%" }}>
       <div className="wishlist-header">
         <div>
-          <h1 className="content-title">Wishlist ({wishlist.length})</h1>
+          <h1 className="content-title">Wishlist</h1>
           <p className="content-description">
             Danh sách sản phẩm bạn yêu thích
           </p>
@@ -887,7 +887,7 @@ function WishlistSection() {
             onChange={(e) => setSearchText(e.target.value)}
             style={{ width: 250 }}
           />
-          <Select
+          {/* <Select
             placeholder="Tất cả danh mục"
             style={{ width: 180 }}
             allowClear
@@ -899,7 +899,7 @@ function WishlistSection() {
                 {cat.name}
               </Option>
             ))}
-          </Select>
+          </Select> */}
           <Button onClick={() => fetchWishlist(page)} loading={loading}>
             Làm mới
           </Button>

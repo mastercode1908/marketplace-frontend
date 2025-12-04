@@ -76,7 +76,7 @@ export default function SellerHeader() {
         <div className="seller-header-left">
           <Link to="/seller/dashboard" className="seller-logo">
             <ShopOutlined style={{ fontSize: "24px", color: "#008ECC" }} />
-            <span className="seller-logo-text">Seller Dashboard</span>
+            <span className="seller-logo-text">Tổng quan cửa hàng</span>
           </Link>
         </div>
 
