@@ -39,6 +39,7 @@ import { useAuth } from "../../hooks/useAuth";
 import wishlistApi from "../../api/commerce/wishlistApi";
 import notificationApi from "../../api/communication/NotificationApi";
 import categoryApi from "../../api/catalog/categoryApi";
+import PasswordChangeFormComponent from "../../components/ui/PasswordChangeForm";
 import "../../styles/UserProfilePage.css";
 
 const { Option } = Select;
@@ -1014,6 +1015,7 @@ export default function UserProfilePage() {
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
   const [form] = Form.useForm();
+  const [passwordForm] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [profileData, setProfileData] = useState(null);
@@ -1574,129 +1576,7 @@ export default function UserProfilePage() {
 
       {activeMenu === "wishlist" && <WishlistSection />}
 
-      {activeMenu === "password" && (
-        <div>
-          <h1 className="content-title">Đổi Mật Khẩu</h1>
-          <p className="content-description">Thay đổi mật khẩu của bạn</p>
-          <div className="max-w-md">
-            <Form
-              layout="vertical"
-              onFinish={async (values) => {
-                if (values.newPassword !== values.confirmPassword) {
-                  toast.error("Mật khẩu xác nhận không khớp");
-                  return;
-                }
-                try {
-                  setLoading(true);
-                  await import("../../api/identity/authApi").then(module => module.default.changePassword({
-                    oldPassword: values.oldPassword,
-                    newPassword: values.newPassword,
-                    confirmPassword: values.confirmPassword
-                  }));
-                  toast.success("Đổi mật khẩu thành công");
-                  form.resetFields();
-                } catch (error) {
-                  console.error("Error changing password:", error);
-                  toast.error(error.response?.data?.message || "Đổi mật khẩu thất bại");
-                } finally {
-                  setLoading(false);
-                }
-              }}
-            >
-              <Form.Item
-                label="Mật khẩu hiện tại"
-                name="oldPassword"
-                rules={[
-                  {
-                    validator(_, value) {
-                      if (!value) {
-                        return Promise.resolve(); // Hide error when empty
-                      }
-                      if (value.trim() === '') {
-                        return Promise.reject(new Error('Mật khẩu không được chứa khoảng trắng'));
-                      }
-                      return Promise.resolve();
-                    },
-                  },
-                  {
-                    required: true,
-                    message: "Vui lòng nhập mật khẩu hiện tại",
-                  },
-                ]}
-              >
-                <Input.Password placeholder="Nhập mật khẩu hiện tại" />
-              </Form.Item>
-
-              <Form.Item
-                label="Mật khẩu mới"
-                name="newPassword"
-                rules={[
-                  {
-                    validator(_, value) {
-                      if (!value) {
-                        return Promise.resolve(); // Hide error when empty
-                      }
-                      if (value.trim() === '') {
-                        return Promise.reject(new Error('Mật khẩu không được chứa khoảng trắng'));
-                      }
-                      if (value.length < 8) {
-                        return Promise.reject(new Error('Mật khẩu phải từ 8 ký tự trở lên'));
-                      }
-                      if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.[\]{}";,<>?/+_=\-]).*$/.test(value)) {
-                        return Promise.reject(new Error('Mật khẩu phải gồm chữ hoa, chữ thường, số và ký tự đặc biệt'));
-                      }
-                      return Promise.resolve();
-                    },
-                  },
-                  {
-                    required: true,
-                    message: "Vui lòng nhập mật khẩu mới",
-                  },
-                ]}
-              >
-                <Input.Password placeholder="Nhập mật khẩu mới" />
-              </Form.Item>
-
-              <Form.Item
-                label="Xác nhận mật khẩu mới"
-                name="confirmPassword"
-                dependencies={['newPassword']}
-                rules={[
-                  {
-                    required: true,
-                    message: "Vui lòng xác nhận mật khẩu mới",
-                    validator(_, value) {
-                      if (!value) {
-                        return Promise.resolve(); // Hide error when empty
-                      }
-                      if (value.trim() === '') {
-                        return Promise.reject(new Error('Mật khẩu không được chứa khoảng trắng'));
-                      }
-                      return Promise.resolve();
-                    },
-                  },
-                  ({ getFieldValue }) => ({
-                    validator(_, value) {
-                      if (!value || getFieldValue('newPassword') === value) {
-                        return Promise.resolve();
-                      }
-                      return Promise.reject(new Error('Mật khẩu không khớp!'));
-                    },
-                  }),
-                ]}
-              >
-                <Input.Password placeholder="Nhập lại mật khẩu mới" />
-              </Form.Item>
-
-              <Form.Item>
-                <Button type="primary" htmlType="submit" loading={loading} className="bg-[#008ECC]">
-                  Đổi mật khẩu
-                </Button>
-              </Form.Item>
-            </Form>
-          </div>
-        </div>
-      )}
+      {activeMenu === "password" && <PasswordChangeFormComponent />}
     </div>
   );
 }

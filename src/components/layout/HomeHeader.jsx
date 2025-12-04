@@ -918,7 +918,7 @@ export default function HomeHeader() {
                         icon={<UserOutlined />}
                         style={{ backgroundColor: "#008ECC" }}
                       />
-                      <span style={{ fontSize: '16px', lineHeight: '1.125em', color: '#666666', fontWeight: 700, maxWidth: '120px', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <span style={{ fontSize: '16px', lineHeight: '1.5em', color: '#666666', fontWeight: 700, maxWidth: '120px', textOverflow: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden', display: 'inline-block' }}>
                         {user.fullName || user.data?.user?.fullName || user.user?.fullName || user.username || user.data?.user?.username || user.user?.username || user.email || user.data?.user?.email || user.user?.email || 'Người dùng'}
                       </span>
                     </div>

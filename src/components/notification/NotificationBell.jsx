@@ -219,7 +219,10 @@ export default function NotificationBell() {
     }
   };
 
-  useWebSocket(getWebSocketUrl(), handleWebSocketMessage);
+  const userId = user?.id || user?.user?.id || user?.userId || user?.user?.userId;
+  const subscribePath = userId ? `/topic/notification/${userId}` : null;
+
+  useWebSocket(getWebSocketUrl(), handleWebSocketMessage, subscribePath);
 
   useEffect(() => {
     if (!isAdmin()) {
