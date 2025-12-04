@@ -1,18 +1,68 @@
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Layout, Menu } from "antd";
+import { Layout, Menu, Badge } from "antd";
 import {
     CheckCircleOutlined,
     FlagOutlined,
     PictureOutlined,
     MessageOutlined,
 } from "@ant-design/icons";
+import { useAuth } from "../../hooks/useAuth";
 import "../../styles/SellerLayout.css";
+import chatApi from "../../api/communication/chatApi";
+import chatWebSocketService from "../../services/chatWebSocketService";
 
 const { Sider } = Layout;
 
 export default function ContentAdminSidebar() {
+    const { user } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
+    const [unreadCount, setUnreadCount] = useState(0);
+
+    const userId = user?.id || user?.user?.id || user?.userId || user?.user?.userId;
+
+    useEffect(() => {
+        if (!userId) return;
+
+        const fetchUnreadCount = async () => {
+            try {
+                const response = await chatApi.getConversations();
+                const conversations = response.data.data || [];
+
+                // Calculate total unread count for ContentAdmin
+                const totalUnread = conversations.reduce((acc, conv) => {
+                    let count = 0;
+                    // Admin có thể là buyer hoặc seller trong conversation
+                    if (conv.sellerId === userId) {
+                        count = conv.unreadCountSeller || 0;
+                    } else if (conv.buyerId === userId) {
+                        count = conv.unreadCountBuyer || 0;
+                    }
+                    return acc + count;
+                }, 0);
+
+                setUnreadCount(totalUnread);
+            } catch (error) {
+                console.error("Failed to fetch conversations for sidebar:", error);
+            }
+        };
+
+        fetchUnreadCount();
+
+        // WebSocket for real-time updates
+        chatWebSocketService.connect(() => {
+            chatWebSocketService.subscribe('/user/queue/messages', (message) => {
+                if (message.senderId !== userId) {
+                    setUnreadCount(prev => prev + 1);
+                }
+            });
+        });
+
+        return () => {
+            // Cleanup if needed
+        };
+    }, [userId]);
 
     const menuItems = [
         {
@@ -33,7 +83,14 @@ export default function ContentAdminSidebar() {
         {
             key: "/user/chat",
             icon: <MessageOutlined />,
-            label: "Tin nhắn",
+            label: (
+                <span className="flex justify-between items-center w-full">
+                    <span>Tin nhắn</span>
+                    {unreadCount > 0 && (
+                        <Badge count={unreadCount} size="small" />
+                    )}
+                </span>
+            ),
         },
     ];
 
