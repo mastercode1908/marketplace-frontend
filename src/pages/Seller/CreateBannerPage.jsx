@@ -6,7 +6,7 @@ import {
     Button,
     DatePicker,
 } from "antd";
-import { UploadOutlined, ArrowLeftOutlined } from "@ant-design/icons";
+import { UploadOutlined, ArrowLeftOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
 import sellerBannerApi from "../../api/seller/sellerBannerApi";
 import mediaApi from "../../api/identity/mediaApi";
@@ -83,6 +83,12 @@ export default function CreateBannerPage() {
         } finally {
             setUploading(false);
         }
+    };
+
+    const handleRemoveImage = () => {
+        setImageUrl("");
+        form.setFieldValue("imageUrl", "");
+        toast.success("Đã xóa ảnh");
     };
 
     const handleSubmit = async (values) => {
@@ -203,16 +209,28 @@ export default function CreateBannerPage() {
                                 id="banner-image-upload"
                                 disabled={uploading}
                             />
-                            <Button
-                                icon={<UploadOutlined />}
-                                loading={uploading}
-                                onClick={() =>
-                                    document.getElementById("banner-image-upload").click()
-                                }
-                                style={{ marginBottom: "8px", display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-                            >
-                                {uploading ? "Đang tải lên..." : "Tải ảnh lên"}
-                            </Button>
+                            <div style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
+                                <Button
+                                    icon={<UploadOutlined />}
+                                    loading={uploading}
+                                    onClick={() =>
+                                        document.getElementById("banner-image-upload").click()
+                                    }
+                                    style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                                >
+                                    {uploading ? "Đang tải lên..." : "Tải ảnh lên"}
+                                </Button>
+                                {imageUrl && (
+                                    <Button
+                                        danger
+                                        icon={<DeleteOutlined />}
+                                        onClick={handleRemoveImage}
+                                        style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                                    >
+                                        Xóa ảnh
+                                    </Button>
+                                )}
+                            </div>
                             <p style={{ fontSize: "12px", color: "#666", margin: "4px 0" }}>
                                 Định dạng: PNG, JPG, WebP (tối đa 5MB)
                             </p>

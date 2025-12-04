@@ -41,6 +41,7 @@ export default function ContentAdminDashboardPage() {
   const [rejectModalVisible, setRejectModalVisible] = useState(false);
   const [isStatusModalVisible, setIsStatusModalVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [searchText, setSearchText] = useState(""); // Search state
   const [form] = Form.useForm();
 
   const [activeTab, setActiveTab] = useState("PENDING");
@@ -52,6 +53,7 @@ export default function ContentAdminDashboardPage() {
       const data = await contentAdminApi.getProducts(status);
       // Normalize data if needed (handle array or object with content)
       const list = Array.isArray(data) ? data : data?.content || [];
+      console.log("Product data sample:", list[0]); // Debug: check product structure
       setProducts(list);
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -135,20 +137,39 @@ export default function ContentAdminDashboardPage() {
 
   const showStatusModal = (product) => {
     setSelectedProduct(product);
-    // If in Approved or Rejected tab, clear the value to show placeholder
-    // because the current status is not in the available options.
-    if (activeTab === "Approved" || activeTab === "Rejected") {
-      form.setFieldsValue({ status: null });
-    } else {
-      form.setFieldsValue({ status: product.productStatus || product.status });
-    }
+    // Always clear the status field to show placeholder
+    form.setFieldsValue({ status: null, note: null });
     setIsStatusModalVisible(true);
   };
 
   const handleStatusModalOk = async () => {
+    if (!selectedProduct) return;
+    const id = selectedProduct.productId || selectedProduct.id;
+
     try {
       const values = await form.validateFields();
+      setActionLoading(id);
+
+      // Call API to update status
+      await contentAdminApi.updateProductStatus(
+        id,
+        values.status,
+        values.note || null
+      );
+
+      // Show success message based on status
+      const statusMessages = {
+        "Approved": "Đã duyệt sản phẩm thành công",
+        "Rejected": "Đã từ chối sản phẩm",
+        "Inactive": "Đã cấm sản phẩm"
+      };
+      message.success(statusMessages[values.status] || "Cập nhật trạng thái thành công");
+
+      // Close modal and refresh
+      setIsStatusModalVisible(false);
       form.resetFields();
+      setSelectedProduct(null);
+      fetchProducts();
     } catch (error) {
       console.error(error);
       message.error("Không thể cập nhật trạng thái. Vui lòng thử lại.");
@@ -201,6 +222,26 @@ export default function ContentAdminDashboardPage() {
       key: "category",
       width: 120,
       render: (_, category) => category?.categoryName || "N/A",
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "productStatus",
+      key: "productStatus",
+      width: 120,
+      render: (status) => {
+        const statusConfig = {
+          PENDING: { color: "orange", text: "Chờ duyệt" },
+          Pending: { color: "orange", text: "Chờ duyệt" },
+          APPROVED: { color: "green", text: "Đã duyệt" },
+          Approved: { color: "green", text: "Đã duyệt" },
+          REJECTED: { color: "red", text: "Từ chối" },
+          Rejected: { color: "red", text: "Từ chối" },
+          INACTIVE: { color: "default", text: "Cấm" },
+          Inactive: { color: "default", text: "Cấm" },
+        };
+        const config = statusConfig[status] || { color: "default", text: status };
+        return <Tag color={config.color}>{config.text}</Tag>;
+      },
     },
     {
       title: "Người bán",
@@ -280,14 +321,25 @@ export default function ContentAdminDashboardPage() {
             Danh sách các sản phẩm đang chờ phê duyệt
           </Text>
         </div>
-        <Button
-          icon={<ReloadOutlined />}
-          onClick={fetchProducts}
-          loading={loading}
-          style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-        >
-          Làm mới
-        </Button>
+
+        <Space>
+          <Input.Search
+            placeholder="Tìm kiếm theo tên sản phẩm..."
+            allowClear
+            enterButton
+            onSearch={(value) => setSearchText(value.trim())} // Trim input on search
+            onChange={(e) => setSearchText(e.target.value)} // Update as user types (optional: can be removed if only want onSearch)
+            style={{ width: 300 }}
+          />
+          <Button
+            icon={<ReloadOutlined />}
+            onClick={fetchProducts}
+            loading={loading}
+            style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            Làm mới
+          </Button>
+        </Space>
       </div>
 
       <Tabs
@@ -298,6 +350,7 @@ export default function ContentAdminDashboardPage() {
           { key: "PENDING", label: "Chờ Duyệt" },
           { key: "Approved", label: "Đã Duyệt" },
           { key: "Rejected", label: "Từ Chối" },
+          { key: "Inactive", label: "Cấm" },
         ]}
         style={{ marginBottom: 16 }}
       />
@@ -305,7 +358,9 @@ export default function ContentAdminDashboardPage() {
       <Card className="chart-card" bordered={false} bodyStyle={{ padding: 0 }}>
         <Table
           columns={columns}
-          dataSource={products}
+          dataSource={products.filter((p) =>
+            p.name.toLowerCase().includes(searchText.trim().toLowerCase())
+          )}
           rowKey={(record) => record.productId || record.id}
           loading={loading}
           pagination={{ pageSize: 10 }}
@@ -358,24 +413,39 @@ export default function ContentAdminDashboardPage() {
           >
             <Select
               placeholder="Hãy chọn trạng thái"
-              options={
-                activeTab === "Approved"
-                  ? [{ label: "Từ chối", value: "Rejected" }]
-                  : activeTab === "Rejected"
-                    ? [{ label: "Đã duyệt", value: "Approved" }]
-                    : [
-                      { label: "Đã duyệt", value: "Approved" },
-                      { label: "Từ chối", value: "Rejected" },
-                    ]
-              }
+              options={(() => {
+                const currentStatus = selectedProduct?.productStatus;
+                if (currentStatus === "Approved") {
+                  return [
+                    { label: "Từ chối", value: "Rejected" },
+                    { label: "Cấm", value: "Inactive" },
+                  ];
+                } else if (currentStatus === "Rejected") {
+                  return [
+                    { label: "Duyệt", value: "Approved" },
+                    { label: "Cấm", value: "Inactive" },
+                  ];
+                } else if (currentStatus === "Inactive") {
+                  return [
+                    { label: "Duyệt", value: "Approved" },
+                  ];
+                } else {
+                  return [
+                    { label: "Duyệt", value: "Approved" },
+                    { label: "Từ chối", value: "Rejected" },
+                    { label: "Cấm", value: "Inactive" },
+                  ];
+                }
+              })()}
             />
           </Form.Item>
           <Form.Item
             noStyle
             shouldUpdate={(prevValues, currentValues) => prevValues.status !== currentValues.status}
           >
-            {({ getFieldValue }) =>
-              getFieldValue("status") === "Rejected" ? (
+            {({ getFieldValue }) => {
+              const status = getFieldValue("status");
+              return status === "Rejected" ? (
                 <Form.Item
                   label="Lý do từ chối"
                   name="note"
@@ -383,11 +453,19 @@ export default function ContentAdminDashboardPage() {
                 >
                   <Input.TextArea rows={4} placeholder="Nhập lý do từ chối..." />
                 </Form.Item>
-              ) : null
-            }
+              ) : status === "Inactive" ? (
+                <Form.Item
+                  label="Lý do cấm"
+                  name="note"
+                  rules={[{ required: true, message: "Vui lòng nhập lý do cấm" }]}
+                >
+                  <Input.TextArea rows={4} placeholder="Nhập lý do cấm sản phẩm..." />
+                </Form.Item>
+              ) : null;
+            }}
           </Form.Item>
         </Form>
       </Modal>
-    </div>
+    </div >
   );
 }

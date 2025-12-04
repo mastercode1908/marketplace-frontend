@@ -2,12 +2,17 @@ import { useEffect, useRef, useState } from "react";
 import SockJS from "sockjs-client";
 import Stomp from "stompjs";
 
-export function useWebSocket(url, onMessage) {
+export function useWebSocket(url, onMessage, subscribePath = "/user/queue/notifications") {
   const [isConnected, setIsConnected] = useState(false);
   const stompClientRef = useRef(null);
   const socketRef = useRef(null);
   const connectionAttemptsRef = useRef(0);
   const maxAttempts = 1; // Chỉ thử 1 lần
+  const onMessageRef = useRef(onMessage);
+
+  useEffect(() => {
+    onMessageRef.current = onMessage;
+  }, [onMessage]);
 
   useEffect(() => {
     if (!url) return;
@@ -54,7 +59,7 @@ export function useWebSocket(url, onMessage) {
 
       const stompClient = Stomp.over(socket);
       stompClientRef.current = stompClient;
-      stompClient.debug = () => {}; // tắt log STOMP
+      stompClient.debug = () => { }; // tắt log STOMP
 
       // Kết nối STOMP với token trong header
       stompClient.connect(
@@ -65,14 +70,16 @@ export function useWebSocket(url, onMessage) {
           connectionAttemptsRef.current = 0; // Reset on success
 
           // Subscribe vào queue notifications của user
-          stompClient.subscribe("/user/queue/notifications", (msg) => {
-            try {
-              const data = JSON.parse(msg.body);
-              if (onMessage) onMessage(data);
-            } catch (error) {
-              console.error("Error parsing STOMP message:", error);
-            }
-          });
+          if (subscribePath) {
+            stompClient.subscribe(subscribePath, (msg) => {
+              try {
+                const data = JSON.parse(msg.body);
+                if (onMessageRef.current) onMessageRef.current(data);
+              } catch (error) {
+                console.error("Error parsing STOMP message:", error);
+              }
+            });
+          }
         },
         (error) => {
           console.warn("STOMP connection error:", error);
@@ -117,7 +124,7 @@ export function useWebSocket(url, onMessage) {
         }
       }
     };
-  }, [url, onMessage]);
+  }, [url, subscribePath]);
 
   const sendMessage = (msg) => {
     const sc = stompClientRef.current;

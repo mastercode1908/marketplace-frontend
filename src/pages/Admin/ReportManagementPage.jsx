@@ -17,6 +17,7 @@ import {
     ReloadOutlined,
     EyeOutlined,
 } from "@ant-design/icons";
+import { Input } from "antd";
 import reportApi from "../../api/admin/reportApi.jsx";
 import { Link } from "react-router-dom";
 import "../../styles/AdminDashboard.css";
@@ -33,6 +34,7 @@ const ReportManagementPage = () => {
     const [detailModalVisible, setDetailModalVisible] = useState(false);
     const [selectedReport, setSelectedReport] = useState(null);
     const [activeTab, setActiveTab] = useState("ALL");
+    const [searchText, setSearchText] = useState(""); // Search state
 
     const fetchReports = async () => {
         setLoading(true);
@@ -102,8 +104,9 @@ const ReportManagementPage = () => {
     };
 
     const filteredReports = reports.filter((report) => {
-        if (activeTab === "ALL") return true;
-        return report.status === activeTab;
+        const matchesStatus = activeTab === "ALL" || report.status === activeTab;
+        const matchesSearch = report.shop_name?.toLowerCase().includes(searchText.trim().toLowerCase());
+        return matchesStatus && matchesSearch;
     });
 
     const columns = [
@@ -233,14 +236,24 @@ const ReportManagementPage = () => {
                         Danh sách các báo cáo vi phạm từ người dùng
                     </Text>
                 </div>
-                <Button
-                    icon={<ReloadOutlined />}
-                    onClick={fetchReports}
-                    loading={loading}
-                    style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-                >
-                    Làm mới
-                </Button>
+                <Space>
+                    <Input.Search
+                        placeholder="Tìm kiếm theo tên cửa hàng..."
+                        allowClear
+                        enterButton
+                        onSearch={(value) => setSearchText(value.trim())}
+                        onChange={(e) => setSearchText(e.target.value)}
+                        style={{ width: 300 }}
+                    />
+                    <Button
+                        icon={<ReloadOutlined />}
+                        onClick={fetchReports}
+                        loading={loading}
+                        style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                    >
+                        Làm mới
+                    </Button>
+                </Space>
             </div>
 
             <Tabs
