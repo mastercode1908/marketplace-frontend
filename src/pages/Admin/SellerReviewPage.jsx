@@ -116,6 +116,16 @@ export default function SellerReviewPage() {
     fetchSellers(newPagination.current, newPagination.pageSize);
   };
 
+  const getStatusTag = (status) => {
+    const statusConfig = {
+      Reviewing: { color: "orange", label: "Đang xét duyệt" },
+      Active: { color: "green", label: "Đã duyệt" },
+      Incomplete: { color: "red", label: "Bị từ chối" },
+    };
+    const config = statusConfig[status] || { color: "gray", label: status || "Không xác định" };
+    return <Tag color={config.color}>{config.label}</Tag>;
+  };
+
   const columns = [
     {
       title: "ID",
@@ -149,9 +159,7 @@ export default function SellerReviewPage() {
       title: "Trạng thái",
       dataIndex: "userStatus",
       key: "userStatus",
-      render: (status) => (
-        <Tag color="orange">Đang xét duyệt</Tag>
-      ),
+      render: (status) => getStatusTag(status),
     },
     {
       title: "Thao tác",
@@ -290,7 +298,7 @@ export default function SellerReviewPage() {
               {selectedSeller.taxCode || "-"}
             </Descriptions.Item>
             <Descriptions.Item label="Trạng thái">
-              <Tag color="orange">Đang xét duyệt</Tag>
+              {getStatusTag(selectedSeller.userStatus)}
             </Descriptions.Item>
             <Descriptions.Item label="Ngày tạo">
               {selectedSeller.createdAt
