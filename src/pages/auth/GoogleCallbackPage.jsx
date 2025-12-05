@@ -32,10 +32,15 @@ export default function GoogleCallbackPage() {
                 // Lưu token và user info từ URL params
                 localStorage.setItem("accessToken", accessToken);
 
+                // ✅ Match the structure from normal login (LoginPage.jsx line 44)
+                // Normal login saves: { accessToken, user: { id, username, email, role, ... }, status }
                 const userData = {
-                    userId: userId,
-                    email: email,
-                    role: role,
+                    accessToken: accessToken,
+                    user: {
+                        id: parseInt(userId), // Changed from userId to user.id
+                        email: email,
+                        role: role,
+                    },
                     status: status
                 };
 

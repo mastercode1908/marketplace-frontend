@@ -33,6 +33,22 @@ axiosInstance.interceptors.response.use(
         // Nếu lỗi là 401 (Unauthorized) và chưa retry
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
+
+            // Không refresh nếu đang gọi chính endpoint /auth/refresh (tránh loop)
+            if (originalRequest.url?.includes('/auth/refresh')) {
+                console.warn('Refresh token expired, clearing auth data');
+                localStorage.removeItem("accessToken");
+                localStorage.removeItem("user");
+
+                // Chỉ redirect về login nếu KHÔNG phải đang ở public page
+                const publicPaths = ['/', '/home', '/about', '/privacy', '/terms', '/contact', '/faq', '/login', '/register'];
+                const currentPath = window.location.pathname;
+                if (!publicPaths.includes(currentPath) && !currentPath.startsWith('/product/') && !currentPath.startsWith('/shop/') && !currentPath.startsWith('/category/')) {
+                    window.location.href = "/login";
+                }
+                return Promise.reject(error);
+            }
+
             try {
                 // Gọi API refresh token (dùng cookie)
                 const res = await axios.post(
@@ -56,10 +72,16 @@ axiosInstance.interceptors.response.use(
                 return axiosInstance(originalRequest);
             } catch (refreshError) {
                 console.error("Refresh token thất bại:", refreshError);
-                // Nếu refresh lỗi → xóa token + logout user
+                // Nếu refresh lỗi → xóa token
                 localStorage.removeItem("accessToken");
                 localStorage.removeItem("user");
-                window.location.href = "/login"; // chuyển về trang login
+
+                // Chỉ redirect về login nếu KHÔNG phải đang ở public page
+                const publicPaths = ['/', '/home', '/about', '/privacy', '/terms', '/contact', '/faq', '/login', '/register'];
+                const currentPath = window.location.pathname;
+                if (!publicPaths.includes(currentPath) && !currentPath.startsWith('/product/') && !currentPath.startsWith('/shop/') && !currentPath.startsWith('/category/')) {
+                    window.location.href = "/login"; // chuyển về trang login
+                }
                 return Promise.reject(refreshError);
             }
         }
