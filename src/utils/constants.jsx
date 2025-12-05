@@ -97,6 +97,7 @@ export const ERROR_MESSAGES_VN = {
   6002: "Tài khoản chưa được kích hoạt",
   6003: "Tài khoản đang chờ kích hoạt",
   6004: "Tài khoản đã bị xóa",
+  6005: "Tài khoản đang được xét duyệt",
 
   //Promotion
   7000: "Mã khuyến mãi không tồn tại",

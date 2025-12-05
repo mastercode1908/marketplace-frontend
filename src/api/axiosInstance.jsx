@@ -32,6 +32,14 @@ axiosInstance.interceptors.response.use(
 
         // Nếu lỗi là 401 (Unauthorized) và chưa retry
         if (error.response?.status === 401 && !originalRequest._retry) {
+            // KHÔNG refresh nếu đang gọi endpoint /auth/login hoặc /auth/google/callback
+            // Vì đây là lỗi login chính đáng (sai password, account banned, etc.)
+            if (originalRequest.url?.includes('/auth/login') ||
+                originalRequest.url?.includes('/auth/google/callback')) {
+                console.log('Login/OAuth error - không auto refresh');
+                return Promise.reject(error);
+            }
+
             originalRequest._retry = true;
 
             // Không refresh nếu đang gọi chính endpoint /auth/refresh (tránh loop)
