@@ -75,6 +75,12 @@ function RevenueKPICards({ data, loading }) {
   const commissionPercent =
     totalRevenue > 0 ? ((commission / totalRevenue) * 100).toFixed(2) : "0.00";
 
+  const totalServicePackageRevenue =
+    typeof data.totalServicePackageRevenue === "string"
+      ? parseFloat(data.totalServicePackageRevenue)
+      : data.totalServicePackageRevenue || 0;
+  const totalServicePackages = data.totalServicePackages || 0;
+
   const kpis = [
     {
       title: "Tổng Doanh Thu",
@@ -91,6 +97,14 @@ function RevenueKPICards({ data, loading }) {
       prefix: <DollarOutlined />,
       color: "#52c41a",
       description: `${commissionPercent}% từ doanh thu`,
+    },
+    {
+      title: "Doanh Thu Gói Dịch Vụ",
+      value: totalServicePackageRevenue,
+      formatter: formatCurrency,
+      prefix: <DollarOutlined />,
+      color: "#ff4d4f",
+      description: `${totalServicePackages} gói dịch vụ đã bán`,
     },
     {
       title: "Trung Bình Đơn Hàng",
@@ -110,36 +124,69 @@ function RevenueKPICards({ data, loading }) {
   ];
 
   return (
-    <Row gutter={[16, 16]} style={{ marginBottom: "24px" }}>
-      {kpis.map((kpi, index) => (
-        <Col xs={24} sm={12} lg={6} key={index}>
-          <Card className="kpi-card" loading={loading}>
-            <Statistic
-              title={kpi.title}
-              value={kpi.value}
-              formatter={kpi.formatter}
-              prefix={kpi.prefix}
-              valueStyle={{
-                color: kpi.color,
-                fontSize: "20px",
-                fontWeight: 600,
+    <div style={{ marginBottom: "24px" }}>
+      <Row gutter={[16, 16]}>
+        {kpis.map((kpi, index) => (
+          <Col 
+            xs={24} 
+            sm={12} 
+            md={index < 3 ? 8 : 12} 
+            lg={index < 3 ? 8 : 12}
+            xl={index < 3 ? 8 : 12}
+            key={index}
+          >
+            <Card 
+              className="kpi-card" 
+              loading={loading}
+              style={{
+                height: "100%",
+                borderRadius: "8px",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                transition: "all 0.3s ease",
+                border: "none",
               }}
-            />
-            {kpi.description && (
-              <div
-                style={{
-                  marginTop: "8px",
-                  fontSize: "12px",
-                  color: "#8c8c8c",
+              hoverable
+              bodyStyle={{
+                padding: "20px",
+              }}
+            >
+              <Statistic
+                title={
+                  <span style={{ fontSize: "14px", fontWeight: 500 }}>
+                    {kpi.title}
+                  </span>
+                }
+                value={kpi.value}
+                formatter={kpi.formatter}
+                prefix={
+                  <span style={{ fontSize: "24px", marginRight: "8px" }}>
+                    {kpi.prefix}
+                  </span>
+                }
+                valueStyle={{
+                  color: kpi.color,
+                  fontSize: "24px",
+                  fontWeight: 700,
+                  lineHeight: "1.2",
                 }}
-              >
-                {kpi.description}
-              </div>
-            )}
-          </Card>
-        </Col>
-      ))}
-    </Row>
+              />
+              {kpi.description && (
+                <div
+                  style={{
+                    marginTop: "12px",
+                    fontSize: "13px",
+                    color: "#8c8c8c",
+                    lineHeight: "1.4",
+                  }}
+                >
+                  {kpi.description}
+                </div>
+              )}
+            </Card>
+          </Col>
+        ))}
+      </Row>
+    </div>
   );
 }
 
@@ -310,6 +357,94 @@ const formatPeriodLabel = (period, type) => {
     return period;
   }
 };
+
+// Service Package Revenue Chart Component
+function ServicePackageRevenueChart({ data, periodType, loading }) {
+  if (!data || data.length === 0) {
+    return (
+      <div style={{ textAlign: "center", padding: "40px", color: "#8c8c8c" }}>
+        Không có dữ liệu
+      </div>
+    );
+  }
+
+  const chartData = data.map((item) => {
+    const revenue =
+      typeof item.revenue === "string"
+        ? parseFloat(item.revenue)
+        : item.revenue || 0;
+    const periodStr = item.period ? String(item.period) : "";
+    return {
+      period: formatPeriodLabel(periodStr, periodType),
+      revenue: isNaN(revenue) ? 0 : revenue,
+      packageCount: item.packageCount || 0,
+    };
+  });
+
+  return (
+    <Spin spinning={loading}>
+      <ResponsiveContainer width="100%" height={400}>
+        <LineChart data={chartData}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis
+            dataKey="period"
+            tick={{ fontSize: 11 }}
+            angle={-45}
+            textAnchor="end"
+            height={70}
+          />
+          <YAxis
+            yAxisId="left"
+            tickFormatter={(value) => `${(value / 1000000).toFixed(0)}M`}
+            tick={{ fontSize: 11 }}
+          />
+          <YAxis
+            yAxisId="right"
+            orientation="right"
+            tick={{ fontSize: 11 }}
+          />
+          <Tooltip
+            formatter={(value, name) => {
+              if (name === "revenue")
+                return [formatCurrency(value), "Doanh Thu"];
+              if (name === "packageCount")
+                return [value, "Số Gói"];
+              return [value, name];
+            }}
+            labelStyle={{ color: "#000" }}
+          />
+          <Legend
+            formatter={(value) => {
+              if (value === "revenue") return "Doanh Thu";
+              if (value === "packageCount") return "Số Gói";
+              return value;
+            }}
+          />
+          <Line
+            yAxisId="left"
+            type="monotone"
+            dataKey="revenue"
+            name="revenue"
+            stroke="#ff4d4f"
+            strokeWidth={3}
+            dot={{ fill: "#ff4d4f", r: 4 }}
+            activeDot={{ r: 6 }}
+          />
+          <Line
+            yAxisId="right"
+            type="monotone"
+            dataKey="packageCount"
+            name="packageCount"
+            stroke="#722ed1"
+            strokeWidth={3}
+            dot={{ fill: "#722ed1", r: 4 }}
+            activeDot={{ r: 6 }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </Spin>
+  );
+}
 
 // Revenue Chart Component
 function RevenueChart({ data, periodType, loading }) {
@@ -502,6 +637,89 @@ function TopSellersTable({ data, loading }) {
       key: "orderCount",
       width: 100,
       sorter: (a, b) => a.orderCount - b.orderCount,
+    },
+  ];
+
+  return (
+    <Table
+      columns={columns}
+      dataSource={data}
+      rowKey="sellerId"
+      loading={loading}
+      pagination={false}
+      size="small"
+      scroll={{ y: 350 }}
+    />
+  );
+}
+
+// Top Sellers Service Package Table Component
+function TopSellersServicePackageTable({ data, loading }) {
+  const columns = [
+    {
+      title: "#",
+      key: "rank",
+      width: 60,
+      render: (_, __, index) => {
+        const rank = index + 1;
+        let icon = null;
+        if (rank === 1) icon = <TrophyOutlined style={{ color: "#FFD700" }} />;
+        else if (rank === 2)
+          icon = <TrophyOutlined style={{ color: "#C0C0C0" }} />;
+        else if (rank === 3)
+          icon = <TrophyOutlined style={{ color: "#CD7F32" }} />;
+        return (
+          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+            {icon}
+            <span style={{ fontWeight: rank <= 3 ? 700 : 400 }}>{rank}</span>
+          </div>
+        );
+      },
+    },
+    {
+      title: "Tên Shop",
+      dataIndex: "shopName",
+      key: "shopName",
+      render: (text, record, index) => (
+        <span style={{ fontWeight: index < 3 ? 600 : 400 }}>{text}</span>
+      ),
+    },
+    {
+      title: "Doanh Thu",
+      dataIndex: "revenue",
+      key: "revenue",
+      render: (value, record, index) => {
+        const revenueValue =
+          typeof value === "string" ? parseFloat(value) : value || 0;
+        return (
+          <span
+            style={{
+              fontWeight: index < 3 ? 600 : 400,
+              color: index < 3 ? "#ff4d4f" : "inherit",
+            }}
+          >
+            {formatCurrency(revenueValue)}
+          </span>
+        );
+      },
+      sorter: (a, b) => {
+        const revenueA =
+          typeof a.revenue === "string"
+            ? parseFloat(a.revenue)
+            : a.revenue || 0;
+        const revenueB =
+          typeof b.revenue === "string"
+            ? parseFloat(b.revenue)
+            : b.revenue || 0;
+        return revenueA - revenueB;
+      },
+    },
+    {
+      title: "Số Gói",
+      dataIndex: "packageCount",
+      key: "packageCount",
+      width: 100,
+      sorter: (a, b) => a.packageCount - b.packageCount,
     },
   ];
 
@@ -1112,6 +1330,20 @@ export default function AdminDashboardPage() {
           </Col>
         </Row>
 
+        {revenueData?.servicePackageRevenueByPeriod && revenueData.servicePackageRevenueByPeriod.length > 0 && (
+          <Row gutter={[16, 16]} style={{ marginBottom: "24px" }}>
+            <Col span={24}>
+              <Card title="Biểu Đồ Doanh Thu Gói Dịch Vụ" className="chart-card">
+                <ServicePackageRevenueChart
+                  data={revenueData.servicePackageRevenueByPeriod}
+                  periodType={filters.periodType}
+                  loading={loading}
+                />
+              </Card>
+            </Col>
+          </Row>
+        )}
+
         <Row gutter={[16, 16]} style={{ marginBottom: "24px" }}>
           <Col xs={24} lg={12}>
             <Card
@@ -1133,6 +1365,22 @@ export default function AdminDashboardPage() {
             </Card>
           </Col>
         </Row>
+
+        {revenueData?.topSellersByServicePackage && revenueData.topSellersByServicePackage.length > 0 && (
+          <Row gutter={[16, 16]} style={{ marginBottom: "24px" }}>
+            <Col span={24}>
+              <Card
+                title="Top Người Bán Hàng Theo Doanh Thu Gói Dịch Vụ"
+                className="chart-card"
+              >
+                <TopSellersServicePackageTable
+                  data={revenueData.topSellersByServicePackage}
+                  loading={loading}
+                />
+              </Card>
+            </Col>
+          </Row>
+        )}
 
         <Row gutter={[16, 16]}>
           <Col span={24}>

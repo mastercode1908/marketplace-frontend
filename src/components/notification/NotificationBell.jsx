@@ -31,8 +31,11 @@ export default function NotificationBell() {
   // --- WebSocket URL ---
   const getWebSocketUrl = () => {
     if (isAdmin()) return null;
-    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
-    let baseUrl = apiBaseUrl.replace("http://", "ws://").replace("https://", "wss://");
+    const apiBaseUrl =
+      import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+    let baseUrl = apiBaseUrl
+      .replace("http://", "ws://")
+      .replace("https://", "wss://");
     baseUrl = baseUrl.replace("/api", "").replace(/\/+$/, "");
     return `${baseUrl}/ws/notifications`;
   };
@@ -41,9 +44,10 @@ export default function NotificationBell() {
   const normalizeNotification = (n) => {
     // Extract ID safely, handling 0 as a valid ID
     const rawId = n.id ?? n.notificationId ?? n.notification_id;
-    const safeId = rawId !== undefined && rawId !== null
-      ? String(rawId)
-      : `temp-${Date.now()}-${Math.random()}`;
+    const safeId =
+      rawId !== undefined && rawId !== null
+        ? String(rawId)
+        : `temp-${Date.now()}-${Math.random()}`;
 
     // Parse date safely
     let createdAt = n.createdAt || n.created_at || n.timestamp;
@@ -57,9 +61,13 @@ export default function NotificationBell() {
     }
 
     // Check both isRead (new) and is_Read (old) for backward compatibility
-    const isRead = n.isRead === true || n.isRead === "true" ||
-      n.is_Read === true || n.is_Read === "true" ||
-      n.read === true || n.read === "true";
+    const isRead =
+      n.isRead === true ||
+      n.isRead === "true" ||
+      n.is_Read === true ||
+      n.is_Read === "true" ||
+      n.read === true ||
+      n.read === "true";
 
     return {
       ...n,
@@ -117,13 +125,19 @@ export default function NotificationBell() {
 
   const handleMarkAsRead = async (notificationId) => {
     // Allow 0 as valid ID, but block null/undefined/temp
-    if (notificationId === undefined || notificationId === null || String(notificationId).startsWith("temp-")) {
+    if (
+      notificationId === undefined ||
+      notificationId === null ||
+      String(notificationId).startsWith("temp-")
+    ) {
       return;
     }
 
     // Optimistic update
-    setNotifications(prev => prev.map(n => (n.id === notificationId ? { ...n, read: true } : n)));
-    setUnreadCount(prev => Math.max(0, prev - 1));
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n))
+    );
+    setUnreadCount((prev) => Math.max(0, prev - 1));
 
     try {
       await notificationApi.markAsRead(notificationId);
@@ -142,7 +156,7 @@ export default function NotificationBell() {
     e?.preventDefault();
     try {
       await notificationApi.markAllAsRead();
-      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
       setUnreadCount(0);
       toast.success("Đã đánh dấu tất cả là đã đọc");
     } catch {
@@ -155,7 +169,7 @@ export default function NotificationBell() {
     e?.preventDefault();
     try {
       await notificationApi.hideRead();
-      setNotifications(prev => prev.filter(n => !n.read));
+      setNotifications((prev) => prev.filter((n) => !n.read));
       toast.success("Đã xóa tất cả thông báo đã đọc");
     } catch {
       toast.error("Không thể xóa thông báo đã đọc");
@@ -167,7 +181,11 @@ export default function NotificationBell() {
     setDetailVisible(true);
     // Dropdown stays open so user can see the list
 
-    if (!notification.read && notification.id && !String(notification.id).startsWith("temp-")) {
+    if (
+      !notification.read &&
+      notification.id &&
+      !String(notification.id).startsWith("temp-")
+    ) {
       try {
         await notificationApi.markAsRead(notification.id);
         await fetchNotifications();
@@ -183,11 +201,12 @@ export default function NotificationBell() {
     if (data.type === "NOTIFICATION") {
       const newNotification = normalizeNotification({
         ...data.payload,
-        createdAt: data.payload.createdAt || data.payload.created_at || Date.now(),
+        createdAt:
+          data.payload.createdAt || data.payload.created_at || Date.now(),
       });
 
       // cập nhật state
-      setNotifications(prev => {
+      setNotifications((prev) => {
         // Add new item, then sort everything to be safe
         const updated = [newNotification, ...prev];
         updated.sort((a, b) => {
@@ -197,14 +216,15 @@ export default function NotificationBell() {
         });
 
         // Remove duplicates if any (by ID)
-        const unique = updated.filter((item, index, self) =>
-          index === self.findIndex((t) => t.id === item.id)
+        const unique = updated.filter(
+          (item, index, self) =>
+            index === self.findIndex((t) => t.id === item.id)
         );
 
         return unique.slice(0, 10);
       });
 
-      setUnreadCount(prev => prev + 1);
+      setUnreadCount((prev) => prev + 1);
       fetchUnreadCount();
 
       toast.info(newNotification.title || "Bạn có thông báo mới", {
@@ -219,7 +239,8 @@ export default function NotificationBell() {
     }
   };
 
-  const userId = user?.id || user?.user?.id || user?.userId || user?.user?.userId;
+  const userId =
+    user?.id || user?.user?.id || user?.userId || user?.user?.userId;
   const subscribePath = userId ? `/topic/notification/${userId}` : null;
 
   useWebSocket(getWebSocketUrl(), handleWebSocketMessage, subscribePath);
@@ -228,7 +249,7 @@ export default function NotificationBell() {
     if (!isAdmin()) {
       fetchNotifications();
       fetchUnreadCount();
-      const interval = setInterval(fetchUnreadCount, 30000);
+      const interval = setInterval(fetchUnreadCount, 1000);
       return () => clearInterval(interval);
     }
   }, [user]);
@@ -241,12 +262,40 @@ export default function NotificationBell() {
 
   // --- Dropdown Content ---
   const notificationContent = (
-    <div style={{ width: 450, maxHeight: 500, display: "flex", flexDirection: "column", backgroundColor: "white" }}>
-      <div style={{ padding: 16, borderBottom: "1px solid #f0f0f0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Text strong style={{ fontSize: 16 }}>Thông báo</Text>
+    <div
+      style={{
+        width: 450,
+        maxHeight: 500,
+        display: "flex",
+        flexDirection: "column",
+        backgroundColor: "white",
+      }}
+    >
+      <div
+        style={{
+          padding: 16,
+          borderBottom: "1px solid #f0f0f0",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Text strong style={{ fontSize: 16 }}>
+          Thông báo
+        </Text>
         <Space>
-          {unreadCount > 0 && <Button type="link" size="small" onClick={handleMarkAllAsRead}>Đánh dấu tất cả đã đọc</Button>}
-          <Button type="link" size="small" onClick={handleHideReadNotifications}>Xóa thông báo đã đọc</Button>
+          {unreadCount > 0 && (
+            <Button type="link" size="small" onClick={handleMarkAllAsRead}>
+              Đánh dấu tất cả đã đọc
+            </Button>
+          )}
+          <Button
+            type="link"
+            size="small"
+            onClick={handleHideReadNotifications}
+          >
+            Xóa thông báo đã đọc
+          </Button>
         </Space>
       </div>
       <div style={{ overflowY: "auto", flex: 1, maxHeight: 400 }}>
@@ -254,7 +303,7 @@ export default function NotificationBell() {
           dataSource={notifications}
           loading={loading}
           locale={{ emptyText: "Không có thông báo" }}
-          renderItem={item => {
+          renderItem={(item) => {
             if (!item) return null;
             const createdAt = item.createdAt || item.created_at;
             const isRead = !!item.read;
@@ -266,20 +315,37 @@ export default function NotificationBell() {
                   padding: 16,
                   cursor: "pointer",
                   backgroundColor: !isRead ? "#f0f9ff" : "white",
-                  borderBottom: "1px solid #f5f5f5"
+                  borderBottom: "1px solid #f5f5f5",
                 }}
                 onClick={(e) => {
                   e.stopPropagation(); // Prevent dropdown from closing
                   handleViewDetail(item);
                 }}
-                onMouseEnter={e => { e.currentTarget.style.backgroundColor = !isRead ? "#e6f7ff" : "#fafafa"; }}
-                onMouseLeave={e => { e.currentTarget.style.backgroundColor = !isRead ? "#f0f9ff" : "white"; }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = !isRead
+                    ? "#e6f7ff"
+                    : "#fafafa";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = !isRead
+                    ? "#f0f9ff"
+                    : "white";
+                }}
               >
                 <List.Item.Meta
-                  title={<Text strong={!isRead} style={{ whiteSpace: "normal" }}>{item.title || ""}</Text>}
+                  title={
+                    <Text strong={!isRead} style={{ whiteSpace: "normal" }}>
+                      {item.title || ""}
+                    </Text>
+                  }
                   description={
                     <div>
-                      <Text type="secondary" style={{ whiteSpace: "pre-wrap", display: "block" }}>{item.message || ""}</Text>
+                      <Text
+                        type="secondary"
+                        style={{ whiteSpace: "pre-wrap", display: "block" }}
+                      >
+                        {item.message || ""}
+                      </Text>
                       {createdAt && (
                         <div style={{ marginTop: 8 }}>
                           <Text type="secondary" style={{ fontSize: 11 }}>
@@ -312,7 +378,7 @@ export default function NotificationBell() {
         dropdownRender={() => notificationContent}
         placement="bottomRight"
         trigger={["click"]}
-        getPopupContainer={trigger => trigger.parentElement || document.body}
+        getPopupContainer={(trigger) => trigger.parentElement || document.body}
       >
         <div style={{ cursor: "pointer", marginRight: 16 }}>
           <Badge count={unreadCount} size="small">
@@ -332,7 +398,11 @@ export default function NotificationBell() {
         destroyOnClose={true}
         getContainer={false}
         footer={[
-          <Button key="close" type="primary" onClick={() => setDetailVisible(false)}>
+          <Button
+            key="close"
+            type="primary"
+            onClick={() => setDetailVisible(false)}
+          >
             Đóng
           </Button>,
         ]}
@@ -340,13 +410,27 @@ export default function NotificationBell() {
       >
         {selectedNotification ? (
           <div>
-            <p style={{ whiteSpace: "pre-line", fontSize: "16px", lineHeight: "1.6" }}>
+            <p
+              style={{
+                whiteSpace: "pre-line",
+                fontSize: "16px",
+                lineHeight: "1.6",
+              }}
+            >
               {selectedNotification.message}
             </p>
             {selectedNotification.createdAt && (
-              <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid #f0f0f0" }}>
+              <div
+                style={{
+                  marginTop: 16,
+                  paddingTop: 16,
+                  borderTop: "1px solid #f0f0f0",
+                }}
+              >
                 <Text type="secondary" style={{ fontSize: 13 }}>
-                  {dayjs(selectedNotification.createdAt).format("HH:mm:ss DD/MM/YYYY")}
+                  {dayjs(selectedNotification.createdAt).format(
+                    "HH:mm:ss DD/MM/YYYY"
+                  )}
                 </Text>
               </div>
             )}
