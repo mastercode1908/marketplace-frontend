@@ -7,7 +7,7 @@ export function useWebSocket(url, onMessage, subscribePath = "/user/queue/notifi
   const stompClientRef = useRef(null);
   const socketRef = useRef(null);
   const connectionAttemptsRef = useRef(0);
-  const maxAttempts = 1; // Chỉ thử 1 lần
+  const maxAttempts = 3; // Tăng số lần thử lại
   const onMessageRef = useRef(onMessage);
 
   useEffect(() => {
@@ -29,12 +29,13 @@ export function useWebSocket(url, onMessage, subscribePath = "/user/queue/notifi
 
     // SockJS yêu cầu http/https, không dùng ws/wss
     let httpUrl = url.replace(/^ws:/, "http:").replace(/^wss:/, "https:");
+    if (token) {
+      httpUrl += `?token=${token}`;
+    }
     connectionAttemptsRef.current += 1;
 
     try {
-      const socket = new SockJS(httpUrl, null, {
-        transports: ["websocket", "xhr-streaming", "xhr-polling"],
-      });
+      const socket = new SockJS(httpUrl); // Use default transports
       socketRef.current = socket;
 
       socket.onopen = () => {

@@ -506,8 +506,8 @@ export default function HomePage() {
               const firstMedia =
                 product.media?.length > 0
                   ? product.media.sort(
-                      (a, b) => (a.position ?? 0) - (b.position ?? 0)
-                    )[0]
+                    (a, b) => (a.position ?? 0) - (b.position ?? 0)
+                  )[0]
                   : null;
 
               const imageUrl = firstMedia?.url || FALLBACK_IMAGE;
@@ -519,8 +519,8 @@ export default function HomePage() {
               const discount =
                 originalPrice && product.price
                   ? Math.round(
-                      ((originalPrice - product.price) / originalPrice) * 100
-                    )
+                    ((originalPrice - product.price) / originalPrice) * 100
+                  )
                   : 0;
 
               let rating = 0;

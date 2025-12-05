@@ -201,10 +201,10 @@ export default function SellerDashboardPage() {
   // Prepare chart data
   const chartData = orderGrowthData
     ? orderGrowthData.labels.map((label, index) => ({
-        date: formatPeriodLabel(label, selectedPeriod),
-        orders: orderGrowthData.orderCounts[index],
-        revenue: orderGrowthData.revenues[index],
-      }))
+      date: formatPeriodLabel(label, selectedPeriod),
+      orders: orderGrowthData.orderCounts[index],
+      revenue: orderGrowthData.revenues[index],
+    }))
     : [];
 
   // Custom tooltip for charts
@@ -466,8 +466,8 @@ export default function SellerDashboardPage() {
                   {selectedPeriod === "daily"
                     ? "Theo Ngày"
                     : selectedPeriod === "weekly"
-                    ? "Theo Tuần"
-                    : "Theo Tháng"}
+                      ? "Theo Tuần"
+                      : "Theo Tháng"}
                   )
                 </span>
                 <Segmented
@@ -536,7 +536,7 @@ export default function SellerDashboardPage() {
               {[5, 4, 3, 2, 1].map((star) => {
                 const count =
                   reviewStatsData?.[
-                    `${["five", "four", "three", "two", "one"][5 - star]}Star`
+                  `${["five", "four", "three", "two", "one"][5 - star]}Star`
                   ] || 0;
                 const percent = reviewStatsData?.totalReviews
                   ? (count / reviewStatsData.totalReviews) * 100
