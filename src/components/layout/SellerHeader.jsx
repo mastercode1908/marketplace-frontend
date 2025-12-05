@@ -7,6 +7,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import NotificationBell from "../notification/NotificationBell";
+import authApi from "../../api/identity/authApi";
 import "../../styles/SellerHeader.css";
 
 export default function SellerHeader() {
@@ -16,11 +17,17 @@ export default function SellerHeader() {
   const displayName = user?.fullName || user?.user?.fullName || user?.seller?.user?.fullName || "Người bán";
   const avatarUrl = user?.avatar || user?.avatarUrl || user?.user?.avatarUrl || user?.seller?.user?.avatarUrl;
 
-  const handleLogout = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("user");
-    setUser(null);
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("user");
+      setUser(null);
+      navigate("/login");
+    }
   };
 
   const userMenuItems = [
@@ -76,7 +83,7 @@ export default function SellerHeader() {
         <div className="seller-header-left">
           <Link to="/seller/dashboard" className="seller-logo">
             <ShopOutlined style={{ fontSize: "24px", color: "#008ECC" }} />
-            <span className="seller-logo-text">Seller Dashboard</span>
+            <span className="seller-logo-text">Tổng quan cửa hàng</span>
           </Link>
         </div>
 

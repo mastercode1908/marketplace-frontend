@@ -46,6 +46,7 @@ const SellerProductForm = () => {
     stockQuantity: "",
     media: [], // Array of { id, file, preview, type }
   });
+  const [errors, setErrors] = useState({});
   const navigate = useNavigate(); // hook router
 
   const [existingMedia, setExistingMedia] = useState([]);
@@ -231,16 +232,29 @@ const SellerProductForm = () => {
       navigate("/seller/products");
     } catch (err) {
       toast.dismiss("productAction");
+      console.error("Product error:", err);
 
       const code = err.response?.data?.code;
-      const errorMessage = err.response?.data?.message || err.message;
-      const message =
-        ERROR_MESSAGES_VN?.[code] ||
-        errorMessage ||
-        (isEdit ? "Cập nhật sản phẩm thất bại!" : "Thêm sản phẩm thất bại!");
-      toast.error(message);
+      const backendMessage = err.response?.data?.message;
+      const validationErrors = err.response?.data?.errors; // Object { field: message }
 
-      console.error("Product error:", err);
+      // Nếu có validation errors từ backend (code 1000), parse và hiển thị ở từng field
+      if (
+        code === 1000 &&
+        validationErrors &&
+        typeof validationErrors === "object"
+      ) {
+        setErrors(validationErrors);
+        toast.error("Vui lòng kiểm tra lại thông tin sản phẩm!");
+      } else {
+        // Hiển thị message chung
+        const message =
+          ERROR_MESSAGES_VN?.[code] ||
+          backendMessage ||
+          err.message ||
+          (isEdit ? "Cập nhật sản phẩm thất bại!" : "Thêm sản phẩm thất bại!");
+        toast.error(message);
+      }
     }
   };
 
@@ -303,7 +317,11 @@ const SellerProductForm = () => {
                       onChange={handleInputChange}
                       placeholder="Ví dụ: iPhone 15 Pro Max 256GB"
                       required
+                      className={errors.name ? "border-red-500" : ""}
                     />
+                    {errors.name && (
+                      <p className="text-xs text-red-500 mt-1">{errors.name}</p>
+                    )}
                   </div>
 
                   <div>
@@ -349,11 +367,20 @@ const SellerProductForm = () => {
                       name="description"
                       value={formData.description}
                       onChange={handleInputChange}
-                      placeholder="Mô tả chi tiết về tính năng, chất lượng, bảo hành..."
+                      placeholder="Mô tả tối thiểu 10 ký tự về tính năng, chất lượng, bảo hành..."
                       rows={4}
                       required
-                      className="resize-none"
+                      maxLength={2000}
+                      minLength={10}
+                      className={`resize-none ${
+                        errors.description ? "border-red-500" : ""
+                      }`}
                     />
+                    {errors.description && (
+                      <p className="text-xs text-red-500 mt-1">
+                        {errors.description}
+                      </p>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -378,11 +405,18 @@ const SellerProductForm = () => {
                         type="number"
                         value={formData.price}
                         onChange={handleInputChange}
-                        placeholder="0"
-                        min="0"
+                        placeholder="1000"
+                        min="1000"
                         max="1000000000"
+                        step="1"
                         required
+                        className={errors.price ? "border-red-500" : ""}
                       />
+                      {errors.price && (
+                        <p className="text-xs text-red-500 mt-1">
+                          {errors.price}
+                        </p>
+                      )}
                     </div>
                     <div>
                       <Label
@@ -397,11 +431,18 @@ const SellerProductForm = () => {
                         type="number"
                         value={formData.weight}
                         onChange={handleInputChange}
-                        placeholder="0"
-                        min="0"
-                        max="20000000"
+                        placeholder="1"
+                        min="1"
+                        max="100000"
+                        step="1"
                         required
+                        className={errors.weight ? "border-red-500" : ""}
                       />
+                      {errors.weight && (
+                        <p className="text-xs text-red-500 mt-1">
+                          {errors.weight}
+                        </p>
+                      )}
                     </div>
                     <div>
                       <Label
@@ -416,11 +457,18 @@ const SellerProductForm = () => {
                         type="number"
                         value={formData.stockQuantity}
                         onChange={handleInputChange}
-                        placeholder="0"
-                        min="0"
-                        max="10000"
+                        placeholder="1"
+                        min="1"
+                        max="100000"
+                        step="1"
                         required
+                        className={errors.stockQuantity ? "border-red-500" : ""}
                       />
+                      {errors.stockQuantity && (
+                        <p className="text-xs text-red-500 mt-1">
+                          {errors.stockQuantity}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </CardContent>

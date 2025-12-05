@@ -11,6 +11,7 @@ export default function GoogleCallbackPage() {
     const [loading, setLoading] = useState(true);
     const [message, setMessage] = useState("");
     const [success, setSuccess] = useState(null); // true/false
+    const [userRole, setUserRole] = useState(null); // Track user role
 
     const hasShownToast = useRef(false);
 
@@ -18,67 +19,83 @@ export default function GoogleCallbackPage() {
         const params = new URLSearchParams(window.location.search);
         const successParam = params.get("success");
         const errorCode = params.get("error");
+        const accessToken = params.get("accessToken");
+        const userId = params.get("userId");
+        const email = params.get("email");
+        const role = params.get("role");
+        const status = params.get("status");
 
         setSuccess(successParam === "true");
 
-        const fetchCurrentUser = async () => {
-            if (successParam === "true") {
-                try {
-                    const res = await authApi.refreshToken(); // lấy access token từ refresh token cookie
-                    const authData = res.data;
+        if (successParam === "true" && accessToken) {
+            try {
+                // Lưu token và user info từ URL params
+                localStorage.setItem("accessToken", accessToken);
 
-                    localStorage.setItem("accessToken", authData.accessToken);
-                    localStorage.setItem("user", JSON.stringify(authData.user));
-                    setUser(authData.user);
+                const userData = {
+                    userId: userId,
+                    email: email,
+                    role: role,
+                    status: status
+                };
 
-                    const msg = authData.message || "Xác thực Google thành công!";
-                    setMessage(msg);
-                    if (!hasShownToast.current) {
-                        toast.success(msg);
-                        hasShownToast.current = true;
-                    }
+                localStorage.setItem("user", JSON.stringify(userData));
+                setUser(userData);
+                setUserRole(role); // Save role to state
 
-                    // Delay vài giây để user thấy thông báo trước khi redirect
+                const msg = "Xác thực Google thành công!";
+                setMessage(msg);
+                if (!hasShownToast.current) {
+                    toast.success(msg);
+                    hasShownToast.current = true;
+                }
+
+                setLoading(false);
+
+                // Auto-redirect cho non-BUYER roles
+                const userRoleUpper = role?.toUpperCase();
+                if (userRoleUpper !== "BUYER") {
                     setTimeout(() => {
                         // Nếu status INCOMPLETE, chuyển đến shop-information
-                        if (authData.status?.toUpperCase() === "INCOMPLETE") {
+                        if (status?.toUpperCase() === "INCOMPLETE") {
                             navigate("/shop-information");
                         } else {
-                            const userRole = (authData.user?.role || authData.role || authData.user?.user?.role)?.toUpperCase();
-                            console.log("Google callback - User role:", userRole, "AuthData:", authData);
+                            console.log("Google callback - User role:", userRoleUpper);
 
-                            if (userRole === "ADMIN" || userRole === "SYSTEMADMIN") {
+                            if (userRoleUpper === "ADMIN" || userRoleUpper === "SYSTEMADMIN") {
                                 navigate("/admin", { replace: true });
-                            } else if (userRole === "SELLER") {
+                            } else if (userRoleUpper === "SELLER") {
                                 navigate("/seller/dashboard", { replace: true });
-                            } else {
-                                navigate("/home", { replace: true });
+                            } else if (userRoleUpper === "CONTENTADMIN") {
+                                navigate("/content-admin/dashboard", { replace: true });
                             }
                         }
                     }, 2000);
-                } catch (err) {
-                    console.error(err);
-                    const msg = err.response?.data?.message || "Xác thực thất bại";
-                    setSuccess(false);
-                    setMessage(msg);
-                    toast.error(msg);
-
-                    setTimeout(() => navigate("/login"), 3000);
-                } finally {
-                    setLoading(false);
                 }
-            } else {
-                const msg = ERROR_MESSAGES_VN[errorCode] || "Xác thực thất bại!";
+                // BUYER: không auto-redirect, hiển thị nút "Tiếp tục"
+            } catch (err) {
+                console.error("Error saving auth data:", err);
+                const msg = "Xác thực thất bại";
+                setSuccess(false);
                 setMessage(msg);
                 toast.error(msg);
                 setLoading(false);
-
-                // Chuyển về login sau vài giây
-                setTimeout(() => navigate("/login"), 4000);
+                setTimeout(() => navigate("/login"), 3000);
             }
-        };
+        } else {
+            const msg = ERROR_MESSAGES_VN[errorCode] || "Xác thực thất bại!";
+            setMessage(msg);
 
-        fetchCurrentUser();
+            // Only show toast if not already shown
+            if (!hasShownToast.current) {
+                toast.error(msg);
+                hasShownToast.current = true;
+            }
+            setLoading(false);
+
+            // Chuyển về login sau vài giây
+            setTimeout(() => navigate("/login"), 4000);
+        }
     }, [navigate, setUser]);
 
     return (
@@ -133,7 +150,7 @@ export default function GoogleCallbackPage() {
                                 Quay lại đăng nhập
                             </button>
                         )}
-                        {success && (
+                        {success && userRole?.toUpperCase() === "BUYER" && (
                             <button
                                 onClick={() => navigate("/home")}
                                 className="w-full px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-semibold text-sm shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300"

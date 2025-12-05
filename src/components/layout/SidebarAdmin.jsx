@@ -133,12 +133,12 @@ export default function SidebarAdmin() {
     // Exact match first
     const exactMatch = menuItems.find((item) => path === item.key || path === `${item.key}/`);
     if (exactMatch) return exactMatch.key;
-    
+
     // Then match by startsWith, but prefer longer matches
     const matches = menuItems
       .filter((item) => path.startsWith(item.key))
       .sort((a, b) => b.key.length - a.key.length);
-    
+
     return matches.length > 0 ? matches[0].key : "/admin";
   };
 
@@ -176,7 +176,7 @@ export default function SidebarAdmin() {
           MegaMart
         </h2>
         <p style={{ fontSize: "12px", color: "#8c8c8c", margin: "4px 0 0" }}>
-          Admin Dashboard
+          Tổng quan thống kê
         </p>
       </div>
       <Menu

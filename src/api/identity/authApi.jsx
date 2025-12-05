@@ -41,6 +41,11 @@ const authApi = {
         return res.data;
     },
 
+    logout: async () => {
+        const res = await axiosInstance.post(API_ENDPOINTS.LOGOUT);
+        return res.data;
+    },
+
 };
 
 export default authApi;

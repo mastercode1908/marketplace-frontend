@@ -3,6 +3,7 @@ import { Layout, Avatar, Dropdown, Space } from "antd";
 import { UserOutlined, LogoutOutlined, MessageOutlined } from "@ant-design/icons";
 import { useAuth } from "../../hooks/useAuth";
 import NotificationBell from "../notification/NotificationBell";
+import authApi from "../../api/identity/authApi";
 
 const { Header } = Layout;
 
@@ -13,10 +14,16 @@ export default function AdminHeader() {
   const displayName = user?.fullName || user?.user?.fullName || "Admin";
   const avatarUrl = user?.avatar || user?.avatarUrl || user?.user?.avatarUrl;
 
-  const handleLogout = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("user");
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("user");
+      navigate("/login");
+    }
   };
 
   const menuItems = [
