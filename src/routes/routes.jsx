@@ -74,20 +74,16 @@ const router = createBrowserRouter([
     path: "/",
     element: <AppLayout />,
     children: [
-      // 1. Public Routes (No authentication required) - Blocked for SELLER
-      {
-        element: <RoleRoute deniedRoles="SELLER" />,
-        children: [
-          { path: "", element: <Navigate to="/home" replace /> },
-          { path: "home", element: <HomePage /> },
-          // Info Pages
-          { path: "about", element: <AboutPage /> },
-          { path: "privacy", element: <PrivacyPolicyPage /> },
-          { path: "terms", element: <TermsOfServicePage /> },
-          { path: "contact", element: <ContactPage /> },
-          { path: "faq", element: <FAQPage /> },
-        ],
-      },
+      // 1. Public Routes (No authentication required) - Accessible to all including guests
+      { path: "", element: <Navigate to="/home" replace /> },
+      { path: "home", element: <HomePage /> },
+
+      // Info Pages - Public access for all users including guests
+      { path: "about", element: <AboutPage /> },
+      { path: "privacy", element: <PrivacyPolicyPage /> },
+      { path: "terms", element: <TermsOfServicePage /> },
+      { path: "contact", element: <ContactPage /> },
+      { path: "faq", element: <FAQPage /> },
 
       // 2. Auth Routes
       { path: "login", element: <LoginPage /> },
@@ -96,13 +92,6 @@ const router = createBrowserRouter([
       { path: "forgot", element: <ForgotPasswordRequestPage /> },
       { path: "reset-password", element: <ResetPasswordPage /> },
       { path: "google-callback", element: <GoogleCallbackPage /> },
-
-      // 2.5 Info Pages - Public access for all users
-      { path: "about", element: <AboutPage /> },
-      { path: "privacy", element: <PrivacyPolicyPage /> },
-      { path: "terms", element: <TermsOfServicePage /> },
-      { path: "contact", element: <ContactPage /> },
-      { path: "faq", element: <FAQPage /> },
 
       // Shared Routes (Accessible by all)
       { path: "payment/return", element: <VNPayPaymentReturn /> },

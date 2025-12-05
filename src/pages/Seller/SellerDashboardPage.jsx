@@ -158,6 +158,7 @@ export default function SellerDashboardPage() {
       Shipped: "Đang Giao",
       Delivered: "Đã Giao",
       Cancelled: "Đã Hủy",
+      Paid: "Đã Thanh Toán",
     };
     return statusTextMap[status] || status || "Chờ Xử Lý";
   };
