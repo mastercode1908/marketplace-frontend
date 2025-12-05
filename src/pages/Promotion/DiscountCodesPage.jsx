@@ -143,7 +143,7 @@ export default function PromotionsPage() {
     try {
       await promotionApi.delete(deletingRecord.id);
       setPromotions((prev) => prev.filter((p) => p.id !== deletingRecord.id));
-      toast.success("Đã xóa mã giảm giá!", 5);
+      toast.success("Đã xóa thành công mã giảm giá!", 5);
     } catch (error) {
       console.error(error);
       toast.error("Không thể xóa mã giảm giá");
