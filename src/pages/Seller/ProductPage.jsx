@@ -348,10 +348,10 @@ const SellerProductForm = () => {
                                                 type="number"
                                                 value={formData.price}
                                                 onChange={handleInputChange}
-                                                placeholder="0"
-                                                min="0"
+                                                placeholder="1000"
+                                                min="1000"
                                                 max="1000000000"
-                                                step="1000"
+                                                step="1"
                                                 required
                                                 className={errors.price ? "border-red-500" : ""}
                                             />
@@ -367,8 +367,8 @@ const SellerProductForm = () => {
                                                 type="number"
                                                 value={formData.weight}
                                                 onChange={handleInputChange}
-                                                placeholder="0"
-                                                min="0"
+                                                placeholder="1"
+                                                min="1"
                                                 max="100000"
                                                 step="1"
                                                 required
@@ -386,8 +386,8 @@ const SellerProductForm = () => {
                                                 type="number"
                                                 value={formData.stockQuantity}
                                                 onChange={handleInputChange}
-                                                placeholder="0"
-                                                min="0"
+                                                placeholder="1"
+                                                min="1"
                                                 max="100000"
                                                 step="1"
                                                 required
