@@ -142,6 +142,7 @@ const ChatbotWidget = () => {
                                                 ? 'bg-gradient-to-br from-[#008ECC] to-[#0077AA] text-white rounded-tr-none'
                                                 : 'bg-white text-gray-700 border border-gray-100 rounded-tl-none'
                                                 }`}
+                                            style={{ whiteSpace: 'pre-line' }} // <-- thêm dòng này
                                         >
                                             {msg.text}
                                         </div>
