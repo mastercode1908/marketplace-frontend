@@ -231,11 +231,11 @@ const ChatbotWidget = () => {
                         <div className="p-4 bg-white border-t border-gray-100 shrink-0">
                             <div className="flex gap-2 items-center bg-gray-50 p-1.5 rounded-full border border-gray-200 focus-within:border-[#008ECC] focus-within:ring-2 focus-within:ring-blue-100 transition-all">
                                 <Input
-                                    placeholder="Nhập tin nhắn..."
+                                    placeholder="Tìm giày, quần áo, điện thoại..."
                                     value={inputValue}
                                     onChange={(e) => setInputValue(e.target.value)}
                                     onPressEnter={handleSendMessage}
-                                    className="border-none bg-transparent shadow-none focus:shadow-none px-4 text-sm"
+                                    className="border-none bg-transparent shadow-none focus:shadow-none px-4 text-sm placeholder:italic"
                                     disabled={isLoading}
                                 />
                                 <Button
@@ -248,8 +248,8 @@ const ChatbotWidget = () => {
                                     size="large"
                                 />
                             </div>
-                            <div className="text-[10px] text-center text-gray-400 mt-2">
-                                AI có thể đưa ra thông tin không chính xác.
+                            <div className="text-[10px] text-center text-gray-400 mt-2 font-semibold">
+                                Vui lòng gõ tiếng việt có dấu để tìm chính xác hơn.
                             </div>
                         </div>
                     </motion.div>
