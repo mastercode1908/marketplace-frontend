@@ -204,7 +204,7 @@ export default function CategoryDetailPage() {
     // Filter by search term
     if (searchTerm) {
       filtered = filtered.filter((product) =>
-        product.name?.toLowerCase().includes(searchTerm.toLowerCase())
+        product.name?.toLowerCase().includes(searchTerm.toLowerCase().trim())
       );
     }
 
