@@ -268,7 +268,7 @@ const CheckoutPage = () => {
   const handleEditAddress = async (address) => {
     setEditingAddress(address);
     setShowEditAddressModal(true);
-    
+
     // Reset form
     addressForm.resetFields();
     setSelectedProvinceForEdit(null);
@@ -284,24 +284,24 @@ const CheckoutPage = () => {
             address.provinceName?.includes(p.provinceName || p.ProvinceName) ||
             (p.provinceName || p.ProvinceName)?.includes(address.provinceName)
         );
-        
+
         if (province) {
           const provinceId = province.provinceId || province.ProvinceID;
           setSelectedProvinceForEdit(provinceId);
-          
+
           // Load districts
           const districtRes = await ShippingApi.getDistricts(provinceId);
           const districtsList = districtRes.data || districtRes || [];
           setDistricts(districtsList);
-          
+
           // Load wards
-          const districtId = typeof address.districtId === 'string' 
-            ? parseInt(address.districtId, 10) 
+          const districtId = typeof address.districtId === 'string'
+            ? parseInt(address.districtId, 10)
             : address.districtId;
           const wardRes = await ShippingApi.getWards(districtId);
           const wardsList = wardRes.data || wardRes || [];
           setWards(wardsList);
-          
+
           // Set form values after all data is loaded
           const wardCode = address.wardCode?.toString() || address.wardCode;
           addressForm.setFieldsValue({
@@ -341,7 +341,7 @@ const CheckoutPage = () => {
 
   const handleUpdateAddress = async (values) => {
     if (!editingAddress) return;
-    
+
     try {
       // Lấy provinceName từ provinces dựa trên provinceId
       const province = provinces.find(
@@ -576,8 +576,8 @@ const CheckoutPage = () => {
             v.ownerType === "SELLER"
               ? sellerName
               : ["SYSTEMADMIN", "CONTENTADMIN"].includes(v.ownerType)
-              ? "Toàn sàn"
-              : v.ownerName || "",
+                ? "Toàn sàn"
+                : v.ownerName || "",
         }));
 
       // Sort: seller promotions first, then admin promotions
@@ -930,22 +930,22 @@ const CheckoutPage = () => {
                         style={{
                           marginBottom:
                             idx <
-                            (filteredCheckoutData || checkoutData).sellerOrders
-                              .length -
+                              (filteredCheckoutData || checkoutData).sellerOrders
+                                .length -
                               1
                               ? "24px"
                               : 0,
                           paddingBottom:
                             idx <
-                            (filteredCheckoutData || checkoutData).sellerOrders
-                              .length -
+                              (filteredCheckoutData || checkoutData).sellerOrders
+                                .length -
                               1
                               ? "24px"
                               : 0,
                           borderBottom:
                             idx <
-                            (filteredCheckoutData || checkoutData).sellerOrders
-                              .length -
+                              (filteredCheckoutData || checkoutData).sellerOrders
+                                .length -
                               1
                               ? "1px solid #EDEDED"
                               : "none",
@@ -977,7 +977,7 @@ const CheckoutPage = () => {
                                 paddingBottom: "8px",
                                 borderBottom:
                                   group.items.indexOf(item) <
-                                  group.items.length - 1
+                                    group.items.length - 1
                                     ? "1px solid #EDEDED"
                                     : "none",
                               }}
@@ -1289,7 +1289,7 @@ const CheckoutPage = () => {
                 )}
                 {(filteredCheckoutData || checkoutData) &&
                   (filteredCheckoutData || checkoutData).finalAmount >
-                    49970000 && (
+                  49970000 && (
                     <div
                       style={{
                         marginBottom: "12px",
@@ -1307,7 +1307,7 @@ const CheckoutPage = () => {
                   )}
                 {(filteredCheckoutData || checkoutData) &&
                   (filteredCheckoutData || checkoutData).finalAmount >
-                    50000000 && (
+                  50000000 && (
                     <div
                       style={{
                         marginBottom: "12px",
@@ -1332,7 +1332,7 @@ const CheckoutPage = () => {
                   disabled={
                     (filteredCheckoutData || checkoutData) &&
                     (filteredCheckoutData || checkoutData).finalAmount >
-                      50000000
+                    50000000
                   }
                   style={{
                     backgroundColor: "#008ECC",
@@ -1403,8 +1403,8 @@ const CheckoutPage = () => {
                     (["SYSTEMADMIN", "CONTENTADMIN"].includes(promo.ownerType)
                       ? "Toàn sàn"
                       : isSellerPromo
-                      ? "Shop hiện tại"
-                      : "");
+                        ? "Shop hiện tại"
+                        : "");
 
                   return (
                     <Card
@@ -1786,6 +1786,9 @@ const CheckoutPage = () => {
                   <div style={{ color: "#008ECC", marginTop: "4px" }}>
                     <strong>Ví dụ:</strong> 123 Nguyễn Huệ, Phường Bến Nghé,
                     Quận 1, TP. Hồ Chí Minh
+                  </div>
+                  <div style={{ color: "red", marginTop: "4px", fontWeight: 500 }}>
+                    Lưu ý nhập đúng định dạng số điện thoại. GHN có thể từ chối giao hàng nếu số điện thoại không hợp lệ.
                   </div>
                 </div>
               }
