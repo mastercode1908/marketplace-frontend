@@ -299,9 +299,15 @@ export default function SearchResultPage() {
 
 
 
-    // Filter by Rating
+    // Filter by Rating (Range: star to star + 0.9)
     if (selectedRating) {
-      filtered = filtered.filter((product) => (product.rating || 0) >= selectedRating);
+      filtered = filtered.filter((product) => {
+        const rating = product.rating || 0;
+        // If 5 stars, just check if it's 5
+        if (selectedRating === 5) return rating === 5;
+        // Otherwise check range [star, star + 1)
+        return rating >= selectedRating && rating < selectedRating + 1;
+      });
     }
 
     // Filter by Price
@@ -327,12 +333,14 @@ export default function SearchResultPage() {
         filtered.sort((a, b) => (b.name || "").localeCompare(a.name || "", "vi"));
         break;
       case "newest":
-        // Mock sorting by newest (assuming higher ID is newer for mock data)
-        filtered.sort((a, b) => (b.productId || b.id) - (a.productId || a.id));
+        filtered.sort((a, b) => {
+          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return dateB - dateA;
+        });
         break;
       case "bestselling":
-        // Mock sorting by bestselling (random for now)
-        filtered.sort((a, b) => 0.5 - Math.random());
+        filtered.sort((a, b) => (b.soldQuantity || 0) - (a.soldQuantity || 0));
         break;
       case "relevance":
       default:
@@ -463,7 +471,7 @@ export default function SearchResultPage() {
                       onClick={() => setSelectedRating(selectedRating === star ? null : star)}
                     >
                       <Rate disabled defaultValue={star} className="text-sm" style={{ fontSize: 14 }} />
-                      <span className="text-sm text-gray-600">trở lên</span>
+                      <span className="text-sm text-gray-600"></span>
                     </div>
                   ))}
                 </div>
@@ -570,8 +578,12 @@ export default function SearchResultPage() {
                 bordered={true}
                 size="middle"
               >
+                <Option value="newest">Mới Nhất</Option>
+                <Option value="bestselling">Bán Chạy</Option>
                 <Option value="price-asc">Giá: Thấp đến Cao</Option>
                 <Option value="price-desc">Giá: Cao đến Thấp</Option>
+                <Option value="name-asc">Tên: A-Z</Option>
+                <Option value="name-desc">Tên: Z-A</Option>
               </Select>
             </div>
 

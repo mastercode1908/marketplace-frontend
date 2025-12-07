@@ -112,12 +112,12 @@ export default function ShopDetailPage() {
                 sortedProducts.sort((a, b) => (b.rating || 0) - (a.rating || 0));
                 break;
             case 'newest':
-                // Sort by id (desc) as proxy for date if createdAt not available
-                sortedProducts.sort((a, b) => (b.productId || b.id) - (a.productId || a.id));
+                // Sort by createdAt (desc)
+                sortedProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
                 break;
             case 'sales':
-                // Sort by sold count (desc)
-                sortedProducts.sort((a, b) => (b.sold || 0) - (a.sold || 0));
+                // Sort by soldQuantity (desc)
+                sortedProducts.sort((a, b) => (b.soldQuantity || 0) - (a.soldQuantity || 0));
                 break;
             case 'price-asc':
                 sortedProducts.sort((a, b) => a.price - b.price);

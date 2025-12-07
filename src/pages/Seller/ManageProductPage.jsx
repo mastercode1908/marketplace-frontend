@@ -110,117 +110,27 @@ export default function ManageProductSellerPage() {
     };
 
 
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [selectedStatus, setSelectedStatus] = useState(null);
+
+    const handleResetFilters = () => {
+        setSearchText("");
+        setSelectedCategory(null);
+        setSelectedStatus(null);
+    };
+
     const filteredData = product.filter((item) => {
         const nameMatch = item.name.toLowerCase().includes(searchText.toLowerCase().trim());
         const categoryName = categoryMap[item.categoryId];
         const categoryMatch = categoryName?.toLowerCase().includes(searchText.toLowerCase().trim());
-        return nameMatch || categoryMatch;
+
+        const categoryFilter = selectedCategory ? item.categoryId === selectedCategory : true;
+        const statusFilter = selectedStatus ? item.productStatus === selectedStatus : true;
+
+        return (nameMatch || categoryMatch) && categoryFilter && statusFilter;
     });
 
-    const columns = [
-        {
-            title: "ID",
-            dataIndex: "productId",
-            width: 70,
-            render: (id) => <span className="font-bold">{id}</span>,
-        },
-        {
-            title: "Ảnh",
-            dataIndex: "url",
-            width: 100,
-            render: (url) => (
-                <img
-                    src={url}
-                    alt="product"
-                    style={{ width: 60, height: 60, objectFit: "cover", borderRadius: 6 }}
-                />
-            ),
-        },
-        {
-            title: "Tên sản phẩm",
-            dataIndex: "name",
-        },
-        {
-            title: "Danh mục",
-            dataIndex: "categoryId",
-            render: (id) => {
-                switch (id) {
-                    case 1: return "Điện thoại";
-                    case 2: return "Laptop";
-                    case 3: return "Phụ kiện";
-                    case 4: return "Quần áo";
-                    case 5: return "Giày dép";
-                    case 6: return "Đồng hồ";
-                    case 7: return "Mỹ phẩm";
-                    case 8: return "Đồ gia dụng";
-                    case 9: return "Thể thao";
-                    case 10: return "Sách";
-                    default: return "Không xác định";
-                }
-            }
-        },
-        {
-            title: "Giá (VNĐ)",
-            dataIndex: "price",
-            render: (price) => price?.toLocaleString(),
-        },
-        {
-            title: "Số lượng tồn",
-            dataIndex: "stockQuantity",
-        },
-        {
-            title: "Trạng thái",
-            dataIndex: "productStatus",
-            render: (status) => (
-                <Tag
-                    color={
-                        status === "Approved"
-                            ? "green"
-                            : status === "Pending"
-                                ? "blue"
-                                : status === "Rejected"
-                                    ? "red"
-                                    : status === "Inactive"
-                                        ? "gray"
-                                        : "default"
-                    }
-                >
-                    {status === "Approved"
-                        ? "Đang bán"
-                        : status === "Pending"
-                            ? "Chờ duyệt"
-                            : status === "Rejected"
-                                ? "Từ chối"
-                                : status === "Inactive"
-                                    ? "Ngừng bán"
-                                    : "Không xác định"}
-                </Tag>
-            ),
-        },
-        {
-            title: "Thao tác",
-            render: (_, record) => (
-                <Space size="small">
-                    <Tooltip title="Chỉnh sửa">
-                        <Button
-                            type="text"
-                            icon={<EditOutlined />}
-                            onClick={() => handleEdit(record)}
-                        />
-                    </Tooltip>
-                    <Tooltip title="Xóa">
-                        <Button
-                            type="text"
-                            danger
-                            icon={<DeleteOutlined />}
-                            onClick={() => showDeleteModal(record)}
-                        />
-                    </Tooltip>
-                </Space>
-            ),
-        },
-    ];
-
+    // ... (keep columns definition) ...
 
     return (
         <div className="seller-content">
@@ -240,10 +150,10 @@ export default function ManageProductSellerPage() {
             </div>
 
             <Card className="mb-6" style={{ border: '1px solid white', boxShadow: 'none' }}>
-                <Row gutter={16} align="middle">
+                <Row gutter={[16, 16]} align="middle">
                     <Col flex="auto">
                         <Input
-                            placeholder="Tìm kiếm theo tên sản phẩm hoặc danh mục..."
+                            placeholder="Tìm kiếm theo tên sản phẩm..."
                             prefix={<SearchOutlined />}
                             value={searchText}
                             onChange={(e) => setSearchText(e.target.value)}
@@ -251,7 +161,41 @@ export default function ManageProductSellerPage() {
                         />
                     </Col>
                     <Col>
-                        <Button icon={<FilterOutlined />} size="large" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Select
+                            placeholder="Danh mục"
+                            style={{ width: 150 }}
+                            size="large"
+                            allowClear
+                            value={selectedCategory}
+                            onChange={setSelectedCategory}
+                        >
+                            {Object.entries(categoryMap).map(([id, name]) => (
+                                <Option key={id} value={Number(id)}>{name}</Option>
+                            ))}
+                        </Select>
+                    </Col>
+                    <Col>
+                        <Select
+                            placeholder="Trạng thái"
+                            style={{ width: 150 }}
+                            size="large"
+                            allowClear
+                            value={selectedStatus}
+                            onChange={setSelectedStatus}
+                        >
+                            <Option value="Approved">Đang bán</Option>
+                            <Option value="Pending">Chờ duyệt</Option>
+                            <Option value="Rejected">Từ chối</Option>
+                            <Option value="Inactive">Ngừng bán</Option>
+                        </Select>
+                    </Col>
+                    <Col>
+                        <Button
+                            icon={<FilterOutlined />}
+                            size="large"
+                            onClick={handleResetFilters}
+                            style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                        >
                             Tất cả
                         </Button>
                     </Col>
