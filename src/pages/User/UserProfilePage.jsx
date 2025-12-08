@@ -944,11 +944,17 @@ function WishlistSection() {
     try {
       const res = await wishlistApi.getAll(pageNumber, pageSize);
       const items = normalizeWishlist(res);
-      setWishlist(items);
+      
+      // Lọc các item hợp lệ (có productId và productName)
+      const validItems = items.filter(item => 
+        item && item.productId && item.productName
+      );
+      
+      setWishlist(validItems);
       setPage(res.number || 0);
       setTotalPages(res.totalPages || 0);
 
-      setTotalWishlist(res.totalElements ?? items.length);
+      setTotalWishlist(res.totalElements ?? validItems.length);
     } catch (error) {
       console.error("Error fetching wishlist:", error);
       toast.error("Không thể tải wishlist");
@@ -986,6 +992,10 @@ function WishlistSection() {
   };
 
   const filteredWishlist = wishlist.filter((item) => {
+    // Đảm bảo item hợp lệ
+    if (!item || !item.productId || !item.productName) {
+      return false;
+    }
     const matchesSearch = item.productName
       ?.trim()
       .toLowerCase()
