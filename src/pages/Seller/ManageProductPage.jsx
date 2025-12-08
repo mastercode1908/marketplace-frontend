@@ -153,86 +153,98 @@ export default function ManageProductSellerPage() {
 
   const columns = [
     {
+      title: "ID",
+      dataIndex: "productId",
+      width: 70,
+      render: (id) => <span className="font-bold">{id}</span>,
+    },
+    {
       title: "Ảnh",
       dataIndex: "url",
-      key: "url",
+      width: 100,
       render: (url) => (
         <img
-          src={url || "/no-image.png"}
+          src={url}
           alt="product"
-          style={{ width: 60, height: 60, objectFit: "cover", borderRadius: 8 }}
+          style={{ width: 60, height: 60, objectFit: "cover", borderRadius: 6 }}
         />
       ),
     },
     {
       title: "Tên sản phẩm",
       dataIndex: "name",
-      key: "name",
     },
     {
       title: "Danh mục",
       dataIndex: "categoryId",
-      key: "categoryId",
-      render: (id) => categoryMap[id] || "Không rõ",
+      render: (id) => {
+        switch (id) {
+          case 1: return "Điện thoại";
+          case 2: return "Laptop";
+          case 3: return "Phụ kiện";
+          case 4: return "Quần áo";
+          case 5: return "Giày dép";
+          case 6: return "Đồng hồ";
+          case 7: return "Mỹ phẩm";
+          case 8: return "Đồ gia dụng";
+          case 9: return "Thể thao";
+          case 10: return "Sách";
+          default: return "Không xác định";
+        }
+      }
     },
     {
       title: "Giá (VNĐ)",
       dataIndex: "price",
-      key: "price",
-      render: (val) => val.toLocaleString("vi-VN"),
+      render: (price) => price?.toLocaleString(),
     },
     {
-      title: "Tồn kho",
+      title: "Số lượng tồn",
       dataIndex: "stockQuantity",
-      key: "stockQuantity",
     },
     {
       title: "Trạng thái",
       dataIndex: "productStatus",
-      key: "productStatus",
-      render: (status) => {
-        let color = "default";
-        let text = "Không rõ";
-
-        switch (status) {
-          case "Approved":
-          case "ACTIVE":
-            color = "green";
-            text = "Đang bán";
-            break;
-          case "Pending":
-            color = "orange";
-            text = "Chờ duyệt";
-            break;
-          case "Rejected":
-            color = "red";
-            text = "Từ chối";
-            break;
-          case "Inactive":
-          case "INACTIVE":
-            color = "gray";
-            text = "Ngừng bán";
-            break;
-        }
-
-        return <Tag color={color}>{text}</Tag>;
-      },
+      render: (status) => (
+        <Tag
+          color={
+            status === "Approved"
+              ? "green"
+              : status === "Pending"
+                ? "blue"
+                : status === "Rejected"
+                  ? "red"
+                  : status === "Inactive"
+                    ? "gray"
+                    : "default"
+          }
+        >
+          {status === "Approved"
+            ? "Đang bán"
+            : status === "Pending"
+              ? "Chờ duyệt"
+              : status === "Rejected"
+                ? "Từ chối"
+                : status === "Inactive"
+                  ? "Ngừng bán"
+                  : "Không xác định"}
+        </Tag>
+      ),
     },
     {
-      title: "Hành động",
-      key: "actions",
+      title: "Thao tác",
       render: (_, record) => (
-        <Space>
+        <Space size="small">
           <Tooltip title="Chỉnh sửa">
             <Button
-              type="primary"
+              type="text"
               icon={<EditOutlined />}
               onClick={() => handleEdit(record)}
             />
           </Tooltip>
-
           <Tooltip title="Xóa">
             <Button
+              type="text"
               danger
               icon={<DeleteOutlined />}
               onClick={() => showDeleteModal(record)}
