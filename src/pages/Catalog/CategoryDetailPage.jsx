@@ -208,9 +208,15 @@ export default function CategoryDetailPage() {
       );
     }
 
-    // Filter by Rating
+    // Filter by Rating (Range: star to star + 0.9)
     if (selectedRating) {
-      filtered = filtered.filter((product) => (product.rating || 5) >= selectedRating);
+      filtered = filtered.filter((product) => {
+        const rating = product.rating || 0;
+        // If 5 stars, just check if it's 5
+        if (selectedRating === 5) return rating === 5;
+        // Otherwise check range [star, star + 1)
+        return rating >= selectedRating && rating < selectedRating + 1;
+      });
     }
 
     // Filter by Price
@@ -238,6 +244,17 @@ export default function CategoryDetailPage() {
         filtered.sort((a, b) =>
           (b.name || "").localeCompare(a.name || "", "vi")
         );
+        break;
+      case "newest":
+        filtered.sort((a, b) => {
+          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return dateB - dateA;
+        });
+        break;
+      case "best-selling":
+        // Sort by sold quantity (descending)
+        filtered.sort((a, b) => (b.soldQuantity || 0) - (a.soldQuantity || 0));
         break;
       default:
         // Keep original order
@@ -407,7 +424,7 @@ export default function CategoryDetailPage() {
                       onClick={() => setSelectedRating(selectedRating === star ? null : star)}
                     >
                       <Rate disabled defaultValue={star} className="text-sm" style={{ fontSize: 14 }} />
-                      <span className="text-sm text-gray-600">trở lên</span>
+                      <span className="text-sm text-gray-600"></span>
                     </div>
                   ))}
                 </div>
@@ -505,6 +522,8 @@ export default function CategoryDetailPage() {
                     style={{ width: "200px" }}
                   >
                     <Option value="default">Mặc định</Option>
+                    <Option value="newest">Mới Nhất</Option>
+                    <Option value="best-selling">Bán Chạy</Option>
                     <Option value="price-asc">Giá: Thấp đến cao</Option>
                     <Option value="price-desc">Giá: Cao đến thấp</Option>
                     <Option value="name-asc">Tên: A-Z</Option>

@@ -757,22 +757,37 @@ export default function ProductDetailPage() {
             <section className="store-info-card">
               <div className="store-info-left">
                 <div className="store-avatar">
-                  {shopInfo?.user?.avatar ? (
-                    <img
-                      src={shopInfo.user.avatar}
-                      alt={shopInfo.seller?.shop_name || "Shop Avatar"}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
-                    />
-                  ) : (
-                    <ShopOutlined />
-                  )}
+                  <Link to={`/shop/${product?.sellerId}`}>
+                    {shopInfo?.user?.avatar ? (
+                      <img
+                        src={shopInfo.user.avatar}
+                        alt={shopInfo.seller?.shop_name || "Shop Avatar"}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
+                      />
+                    ) : (
+                      <ShopOutlined />
+                    )}
+                  </Link>
                 </div>
                 <div>
-                  <h3>{shopInfo?.seller?.shop_name || shopInfo?.user?.full_name || shopInfo?.shop_name || shopInfo?.shopName || product?.shopName || `Cửa hàng #${product?.sellerId || "..."}`}</h3>
+                  <h3>
+                    <Link to={`/shop/${product?.sellerId}`} style={{ color: 'inherit', textDecoration: 'none' }} className="hover:text-[#008ECC] transition-colors">
+                      {shopInfo?.seller?.shop_name || shopInfo?.user?.full_name || shopInfo?.shop_name || shopInfo?.shopName || product?.shopName || `Cửa hàng #${product?.sellerId || "..."}`}
+                    </Link>
+                  </h3>
                   <div className="store-tags">
-                    <span>{shopInfo?.seller?.rating_count || shopInfo?.rating_count || product?.shopRating || 5.0} ★</span>
-                    <span>Đánh giá tích cực {product?.shopPositiveRating || 98}%</span>
-                    <span>{product?.shopYears || 1} năm hoạt động</span>
+                    <span>{shopInfo?.seller?.rating ? Number(shopInfo.seller.rating).toFixed(1) : (product?.shopRating || 5.0)} ★</span>
+                    <span>Đánh giá tích cực {shopInfo?.seller?.positiveRatingPercentage ?? (product?.shopPositiveRating || 98)}%</span>
+                    <span>
+                      {(() => {
+                        const joinDate = shopInfo?.seller?.joinDate || product?.shopJoinDate;
+                        if (joinDate) {
+                          const years = new Date().getFullYear() - new Date(joinDate).getFullYear();
+                          return years > 0 ? `${years} năm hoạt động` : "Mới tham gia";
+                        }
+                        return `${product?.shopYears || 1} năm hoạt động`;
+                      })()}
+                    </span>
                     <span>Shop yêu thích</span>
                   </div>
                 </div>
