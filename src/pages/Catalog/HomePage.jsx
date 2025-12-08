@@ -147,6 +147,7 @@ export default function HomePage() {
     fetchBanners();
   }, []);
 
+
   // Auto-scroll for Categories
   const categoriesScrollRef = useRef(null);
   const categoriesAutoScrollRef = useRef(null);

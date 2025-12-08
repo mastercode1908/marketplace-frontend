@@ -248,7 +248,7 @@ const ChatbotWidget = () => {
                                     size="large"
                                 />
                             </div>
-                            <div className="text-[10px] text-center text-gray-400 mt-2 font-semibold">
+                            <div className="text-[10px] text-center text-gray-400 mt-2 font-bold">
                                 Vui lòng gõ tiếng việt có dấu để tìm chính xác hơn.
                             </div>
                         </div>
