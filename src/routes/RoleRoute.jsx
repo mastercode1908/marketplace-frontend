@@ -51,14 +51,14 @@ const RoleRoute = ({ allowedRoles, deniedRoles }) => {
   const userRole = rawRole?.replace(/_/g, '');
   let hasAccess = true;
 
-  // Chặn admin, content admin và seller truy cập route công khai (route chỉ có deniedRoles, không có allowedRoles)
-  // Hiển thị 404 thay vì redirect
-  if (!allowedRoles && deniedRoles) {
-    const restrictedRoles = ['ADMIN', 'SYSTEMADMIN', 'CONTENTADMIN', 'SELLER'];
-    if (restrictedRoles.includes(userRole)) {
-      return <NotFoundPage />;
-    }
-  }
+  // Redirect map - redirect về dashboard của từng role
+  const redirectMap = {
+    SYSTEMADMIN: '/admin/dashboard',
+    ADMIN: '/admin/dashboard',
+    CONTENTADMIN: '/content-admin/dashboard',
+    SELLER: '/seller/dashboard',
+    BUYER: '/home'
+  };
 
   // Logic 1: Check Blacklist (deniedRoles)
   if (deniedRoles) {
@@ -77,26 +77,14 @@ const RoleRoute = ({ allowedRoles, deniedRoles }) => {
   }
 
   if (!hasAccess) {
-    // Nếu là route ẩn -> Show 404
+    // Nếu là route ẩn (admin/seller routes) -> Show 404 để giấu đường dẫn
     if (isHiddenRoute()) {
       return <NotFoundPage />;
     }
 
-    // Nếu là route công khai và user là admin/content admin/seller -> Show 404
-    if (!allowedRoles && deniedRoles) {
-      const restrictedRoles = ['ADMIN', 'SYSTEMADMIN', 'CONTENTADMIN', 'SELLER'];
-      if (restrictedRoles.includes(userRole)) {
-        return <NotFoundPage />;
-      }
-    }
-
     toast.error("Bạn không có quyền truy cập trang này");
 
-    // Redirect map (chỉ cho BUYER hoặc các role khác)
-    const redirectMap = {
-      BUYER: '/home'
-    };
-
+    // Redirect về dashboard của role tương ứng
     const redirectTo = redirectMap[userRole] || '/home';
     return <Navigate to={redirectTo} replace />;
   }

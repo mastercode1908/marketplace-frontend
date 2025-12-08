@@ -74,9 +74,14 @@ const router = createBrowserRouter([
     path: "/",
     element: <AppLayout />,
     children: [
-      // 1. Public Routes (No authentication required) - Accessible to all including guests
+      // 1. Public Routes - Chỉ dành cho BUYER và guest (chặn SYSTEMADMIN, CONTENTADMIN, SELLER)
       { path: "", element: <Navigate to="/home" replace /> },
-      { path: "home", element: <HomePage /> },
+      {
+        element: <RoleRoute deniedRoles={["SYSTEMADMIN", "ADMIN", "CONTENTADMIN", "SELLER"]} />,
+        children: [
+          { path: "home", element: <HomePage /> },
+        ],
+      },
 
       // Info Pages - Public access for all users including guests
       { path: "about", element: <AboutPage /> },
@@ -95,11 +100,11 @@ const router = createBrowserRouter([
 
       // Shared Routes (Accessible by all)
       { path: "payment/return", element: <VNPayPaymentReturn /> },
-      { path: "user/chat", element: <ChatUI /> },
       { path: "shop-information", element: <SellerInfoPage /> },
-      // 3. Public/Semi-public Routes (Blocked for SELLER)
+      
+      // 3. Buyer Routes - Chỉ dành cho BUYER (chặn SYSTEMADMIN, CONTENTADMIN, SELLER)
       {
-        element: <RoleRoute deniedRoles="SELLER" />,
+        element: <RoleRoute deniedRoles={["SYSTEMADMIN", "ADMIN", "CONTENTADMIN", "SELLER"]} />,
         children: [
           { path: "product/:productId", element: <ProductDetailPage /> },
           { path: "category/:categoryId", element: <CategoryDetailPage /> },
@@ -107,7 +112,6 @@ const router = createBrowserRouter([
           { path: "promotion-detail", element: <PromotionDetailPage /> },
           { path: "product-test", element: <ProductTestPage /> },
           { path: "shop/:shopId", element: <ShopDetailPage /> },
-          { path: "payment/return", element: <VNPayPaymentReturn /> },
         ],
       },
 
