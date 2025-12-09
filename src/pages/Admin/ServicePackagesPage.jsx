@@ -157,9 +157,14 @@ export default function ServicesPage() {
   };
 
   const filteredData = services.filter((item) => {
-    const matchesSearch = item.name.toLowerCase().includes(searchText.toLowerCase().trim());
-    const matchesStatus = statusFilter === "all" ||
-      (statusFilter === "active" ? item.status === "Hoạt động" : item.status === "Ngừng hoạt động");
+    const matchesSearch = item.name
+      .toLowerCase()
+      .includes(searchText.toLowerCase().trim());
+    const matchesStatus =
+      statusFilter === "all" ||
+      (statusFilter === "active"
+        ? item.status === "Hoạt động"
+        : item.status === "Ngừng hoạt động");
     return matchesSearch && matchesStatus;
   });
 
@@ -197,28 +202,28 @@ export default function ServicesPage() {
         <Tag color={status === "Hoạt động" ? "green" : "red"}>{status}</Tag>
       ),
     },
-    {
-      title: "Thao tác",
-      render: (_, record) => (
-        <Space size="small">
-          <Tooltip title="Chỉnh sửa">
-            <Button
-              type="text"
-              icon={<EditOutlined />}
-              onClick={() => handleEdit(record)}
-            />
-          </Tooltip>
-          <Tooltip title="Xóa">
-            <Button
-              type="text"
-              danger
-              icon={<DeleteOutlined />}
-              onClick={() => showDeleteModal(record)}
-            />
-          </Tooltip>
-        </Space>
-      ),
-    },
+    // {
+    //   title: "Thao tác",
+    //   render: (_, record) => (
+    //     <Space size="small">
+    //       <Tooltip title="Chỉnh sửa">
+    //         <Button
+    //           type="text"
+    //           icon={<EditOutlined />}
+    //           onClick={() => handleEdit(record)}
+    //         />
+    //       </Tooltip>
+    //       <Tooltip title="Xóa">
+    //         <Button
+    //           type="text"
+    //           danger
+    //           icon={<DeleteOutlined />}
+    //           onClick={() => showDeleteModal(record)}
+    //         />
+    //       </Tooltip>
+    //     </Space>
+    //   ),
+    // },
   ];
 
   return (
@@ -227,7 +232,7 @@ export default function ServicesPage() {
         <h1 className="text-3xl font-bold text-gray-800">
           Quản lý gói dịch vụ
         </h1>
-        <Button
+        {/* <Button
           type="primary"
           icon={<PlusOutlined />}
           onClick={handleAdd}
@@ -235,7 +240,7 @@ export default function ServicesPage() {
           style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
         >
           Thêm gói
-        </Button>
+        </Button> */}
       </div>
 
       <Card className="mb-6">

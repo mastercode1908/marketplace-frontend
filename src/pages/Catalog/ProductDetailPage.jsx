@@ -265,9 +265,26 @@ export default function ProductDetailPage() {
     if (product?.media?.length) {
       return [...product.media]
         .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
+        .filter((asset) => {
+          const mediaType = asset.mediaType || asset.type || "";
+          return mediaType.toUpperCase() === "IMAGE";
+        })
         .map((asset) => asset.url || FALLBACK_IMAGE);
     }
     return [FALLBACK_IMAGE];
+  }, [product]);
+
+  const videos = useMemo(() => {
+    if (product?.media?.length) {
+      return [...product.media]
+        .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
+        .filter((asset) => {
+          const mediaType = asset.mediaType || asset.type || "";
+          return mediaType.toUpperCase() === "VIDEO";
+        })
+        .map((asset) => asset.url);
+    }
+    return [];
   }, [product]);
 
   const stockQuantity = product?.stockQuantity ?? 0;
@@ -500,14 +517,16 @@ export default function ProductDetailPage() {
     }
   };
 
+  const totalMediaCount = videos.length + images.length;
+
   const handleNextImage = () => {
-    if (!images.length) return;
-    setActiveImageIndex((prev) => (prev + 1) % images.length);
+    if (totalMediaCount === 0) return;
+    setActiveImageIndex((prev) => (prev + 1) % totalMediaCount);
   };
 
   const handlePrevImage = () => {
-    if (!images.length) return;
-    setActiveImageIndex((prev) => (prev - 1 + images.length) % images.length);
+    if (totalMediaCount === 0) return;
+    setActiveImageIndex((prev) => (prev - 1 + totalMediaCount) % totalMediaCount);
   };
 
   const handleChatWithSeller = async () => {
@@ -607,35 +626,83 @@ export default function ProductDetailPage() {
                 )}
               </button>
               <div className="product-gallery">
-                <img
-                  src={images[activeImageIndex]}
-                  alt={product?.name || "Product"}
-                  onError={(e) => {
-                    e.currentTarget.src = FALLBACK_IMAGE;
-                  }}
-                />
-                {images.length > 1 && (
+                {/* Hiển thị video hoặc ảnh tùy theo activeImageIndex */}
+                {videos.length > 0 && activeImageIndex === 0 ? (
+                  <video
+                    src={videos[0]}
+                    controls
+                    className="w-full h-auto"
+                    style={{ maxHeight: "600px", objectFit: "contain" }}
+                  />
+                ) : (
+                  <img
+                    src={images[videos.length > 0 ? activeImageIndex - 1 : activeImageIndex] || FALLBACK_IMAGE}
+                    alt={product?.name || "Product"}
+                    onError={(e) => {
+                      e.currentTarget.src = FALLBACK_IMAGE;
+                    }}
+                  />
+                )}
+                {(images.length > 1 || videos.length > 0) && (
                   <div className="product-gallery__thumbs">
-                    {images.map((imageUrl, index) => (
+                    {/* Hiển thị video thumbnail đầu tiên nếu có */}
+                    {videos.length > 0 && (
                       <button
-                        key={imageUrl + index}
                         type="button"
-                        aria-label={`Ảnh sản phẩm ${index + 1}`}
-                        className={index === activeImageIndex ? "active" : ""}
-                        onClick={() => setActiveImageIndex(index)}
+                        aria-label="Video sản phẩm"
+                        className={activeImageIndex === 0 ? "active" : ""}
+                        onClick={() => setActiveImageIndex(0)}
+                        style={{ position: "relative" }}
                       >
-                        <img
-                          src={imageUrl}
-                          alt={`Thumb ${index + 1}`}
-                          onError={(e) => {
-                            e.currentTarget.src = FALLBACK_IMAGE;
-                          }}
+                        <video
+                          src={videos[0]}
+                          className="w-full h-20 object-cover"
+                          muted
+                          style={{ pointerEvents: "none" }}
                         />
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: "50%",
+                            left: "50%",
+                            transform: "translate(-50%, -50%)",
+                            background: "rgba(0,0,0,0.5)",
+                            borderRadius: "50%",
+                            width: "40px",
+                            height: "40px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <span style={{ color: "white", fontSize: "20px" }}>▶</span>
+                        </div>
                       </button>
-                    ))}
+                    )}
+                    {/* Hiển thị ảnh thumbnails */}
+                    {images.map((imageUrl, index) => {
+                      const thumbIndex = videos.length > 0 ? index + 1 : index;
+                      return (
+                        <button
+                          key={imageUrl + index}
+                          type="button"
+                          aria-label={`Ảnh sản phẩm ${index + 1}`}
+                          className={thumbIndex === activeImageIndex ? "active" : ""}
+                          onClick={() => setActiveImageIndex(thumbIndex)}
+                        >
+                          <img
+                            src={imageUrl}
+                            alt={`Thumb ${index + 1}`}
+                            onError={(e) => {
+                              e.currentTarget.src = FALLBACK_IMAGE;
+                            }}
+                          />
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
-                {images.length > 1 && (
+                {(images.length > 1 || videos.length > 0) && (
                   <>
                     <button
                       type="button"

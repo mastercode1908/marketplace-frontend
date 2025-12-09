@@ -183,17 +183,40 @@ export default function SellerSidebar() {
     }
   };
 
-  // Xác định selected key, bao gồm cả /orders/seller
-  const selectedKey = menuItems.find((item) => {
+  // Xác định selected key, bao gồm cả /orders/seller và product-seller routes
+  const getSelectedKey = () => {
+    const path = location.pathname;
+    
     // Bỏ qua các nút chat admin trong việc xác định selected key
-    if (item.key === "chat-content-admin" || item.key === "chat-system-admin") {
-      return false;
+    const validMenuItems = menuItems.filter(
+      (item) => item.key !== "chat-content-admin" && item.key !== "chat-system-admin"
+    );
+    
+    // Xử lý đặc biệt cho orders
+    if (path.startsWith("/orders/seller") || path.startsWith("/seller/orders")) {
+      return "/seller/orders";
     }
-    if (item.key === "/seller/orders") {
-      return location.pathname.startsWith("/orders/seller") || location.pathname.startsWith("/seller/orders");
+    
+    // Xử lý đặc biệt cho product-seller (thêm/sửa sản phẩm) - nên highlight "Quản Lý Sản Phẩm"
+    if (path.startsWith("/seller/product-seller")) {
+      return "/seller/products";
     }
-    return location.pathname.startsWith(item.key);
-  })?.key || "/seller/dashboard";
+    
+    // Tìm exact match trước
+    const exactMatch = validMenuItems.find(
+      (item) => path === item.key || path === `${item.key}/`
+    );
+    if (exactMatch) return exactMatch.key;
+    
+    // Sau đó tìm match theo prefix, ưu tiên prefix dài hơn
+    const matches = validMenuItems
+      .filter((item) => path.startsWith(item.key))
+      .sort((a, b) => b.key.length - a.key.length);
+    
+    return matches.length > 0 ? matches[0].key : "/seller/dashboard";
+  };
+  
+  const selectedKey = getSelectedKey();
 
   return (
     <Sider
