@@ -33,6 +33,7 @@ import { ERROR_MESSAGES_VN } from "@/utils/constants";
 import productApi from "@/api/identity/productApi";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import { color } from "framer-motion";
 
 const SellerProductForm = () => {
   const [uploading, setUploading] = useState(false);
@@ -481,7 +482,8 @@ const SellerProductForm = () => {
                     Hình Ảnh & Video
                   </CardTitle>
                   <CardDescription>
-                    Hình ảnh tối đa 5, Video tối đa 1
+                    Hình ảnh tối đa 5, Video tối đa 1. Vui lòng upload ảnh
+                    trước.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-5">
