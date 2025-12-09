@@ -757,12 +757,11 @@ export default function ProductDetailPage() {
             <section className="store-info-card">
               <div className="store-info-left">
                 <div className="store-avatar">
-                  <Link to={`/shop/${product?.sellerId}`}>
+                  <Link to={`/shop/${product?.sellerId}`} style={{ display: 'block', width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden' }}>
                     {shopInfo?.user?.avatar ? (
                       <img
                         src={shopInfo.user.avatar}
                         alt={shopInfo.seller?.shop_name || "Shop Avatar"}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
                       />
                     ) : (
                       <ShopOutlined />
