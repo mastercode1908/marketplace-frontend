@@ -25,6 +25,7 @@ import HomeFooter from "../../components/layout/HomeFooter";
 /**
  * Trang giỏ hàng - Redesigned với checkbox selection
  */
+
 const CartPage = () => {
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
