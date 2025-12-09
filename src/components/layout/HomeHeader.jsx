@@ -76,7 +76,7 @@ export default function HomeHeader() {
     { id: 4, name: "Quần áo", icon: SkinOutlined },
     { id: 5, name: "Giày dép", icon: ShoppingOutlined },
     { id: 6, name: "Đồng hồ", icon: ClockCircleOutlined },
-    { id: 7, name: "Mý phẩm", icon: SmileOutlined },
+    { id: 7, name: "Mỹ phẩm", icon: SmileOutlined },
     { id: 8, name: "Đồ gia dụng", icon: HomeOutlined },
     { id: 9, name: "Thể thao", icon: TrophyOutlined },
     { id: 10, name: "Sách vở", icon: BookOutlined },
